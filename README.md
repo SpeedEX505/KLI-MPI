@@ -28,8 +28,8 @@ Seznam uzlů tvořící kliku, popřípadě konstatování, že klika neexistuje
 Sekvenční algoritmus typu BB-DFS s hloubkou stavového stromu omezenou na n. Cena řešení, která se maximalizuje, je velikost kliky vzhledem k zadané podmínce. Horní mez ceny řešení není známa. Algoritmus skončí, až prohledá celý stavový prostor.
 
 ##Meze:
-*Dolní mez je 2, pokud graf obsahuje aspon 1 hranu.
-*Horní mez není známá, ale dá se odhadnout takto: pokud G obsahuje kliku o velikosti x, pak musí obsahovat x vrcholů se stupněm větším nebo rovným x-1.
+* Dolní mez je 2, pokud graf obsahuje aspon 1 hranu.
+* Horní mez není známá, ale dá se odhadnout takto: pokud G obsahuje kliku o velikosti x, pak musí obsahovat x vrcholů se stupněm větším nebo rovným x-1.
 
 ##Paralelní algoritmus:
 Paralelní algoritmus je typu PBB-DFS-V.
