@@ -5,6 +5,7 @@ LBFLAGS=
 Remove=rm -rf
 Objects=src/objects/main.o
 RUN=./kli
+GRAPHFILE=graph.txt
 CPATH=src/objects/
 
      
@@ -16,7 +17,7 @@ all: $(Objects)
 compile: $(RUN)
      
 clean:
-	$(Remove) src/objects $(RUN)
+	$(Remove) src/objects $(RUN) $(GRAPHFILE)
      
 #rules to make objects ----------------------------------------------------------------------------------
 $(RUN): $(Objects)
@@ -24,5 +25,6 @@ $(RUN): $(Objects)
      
 src/objects/main.o: src/main.cpp
 	mkdir -p src/objects
+	./graph
 	$(CC) $(CCFLAGS) -c src/main.cpp -o src/objects/main.o $(LBFLAGS)
 
