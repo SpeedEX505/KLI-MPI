@@ -2,18 +2,16 @@
 #define Graph_H
 #include <cstdio>
 #include <iostream>
+#include <cstdlib>
 
 class Graph{
 	unsigned long nodesCnt;
 	int ** nodesMatrix;
-	// precte prvni radek ve filu -> pocet uzlu
-	int readNodesFile(const char * file);
+	int readNodesCnt(const char * file); 		// reads number of nodes
+	int ** readNodesMatrix(const char * file);	// reads nodes into matrix
 public:
-	Graph();
-	Graph(unsigned long nodesCnt);
+	Graph(const char * filename);
 	~Graph();
-	// parse value in file to matrix
-	void parseFile(const char * filename);
 	void print();
 };
 
