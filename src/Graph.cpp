@@ -13,20 +13,13 @@ Graph::~Graph(){
 }
 
 void Graph::parseFile(const char * filename){
-	std::string line ;
-   	std::ifstream infile( filename ) ;
-   	if ( infile ) {
-      		while ( getline( infile , line ) ) {
-	 		//parseLine
-		}
-  	}
-	infile.close( ) ;
+	
 }
 
 void Graph::print(){
 	for(int i=0;i<nodesCnt;i++){
 		for(int j=0;j<nodesCnt;j++){
-			nodes->printNode());
+			//nodes->printNode());
 		}
 		printf("\n");
 	}

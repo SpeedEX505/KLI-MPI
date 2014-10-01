@@ -1,9 +1,9 @@
 #macros
 CC=g++
-CCFLAGS=-Wall -pedantic -Wno-long-long -O0 -ggdb
+CCFLAGS=
 LBFLAGS=
 Remove=rm -rf
-Objects=src/objects/main.o src/objects/Graph.o
+Objects=src/objects/main.o src/objects/Graph.o src/objects/Stack.o
 RUN=./kli
 GRAPHFILE=graph.txt
 CPATH=src/objects/
@@ -31,3 +31,7 @@ src/objects/main.o: src/main.cpp
 src/objects/Graph.o: src/Graph.cpp src/Graph.h
 	mkdir -p src/objects
 	$(CC) $(CCFLAGS) -c src/Graph.cpp -o src/objects/Graph.o $(LBFLAGS)
+
+src/objects/Stack.o: src/Stack.cpp src/Stack.h
+	mkdir -p src/objects
+	$(CC) $(CCFLAGS) -c src/Stack.cpp -o src/objects/Stack.o $(LBFLAGS)
