@@ -36,23 +36,14 @@ Graph::~Graph(){
 	delete nodes;
 }
 
-void Graph::parseFile(const char * fileName){
-	string line;
-   	ifstream inFile(fileName);
+void Graph::parseFile(const char * filename){
 
-   	if(inFile) {
-   		while(getline(inFile, line)) {
-
-   		}
-  	}
-
-	infile.close( ) ;
 }
 
 void Graph::print(){
 	for(int i=0;i<nodesCnt;i++){
 		for(int j=0;j<nodesCnt;j++){
-			nodes->printNode());
+			//nodes->printNode());
 		}
 		printf("\n");
 	}
