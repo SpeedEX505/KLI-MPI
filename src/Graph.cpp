@@ -1,25 +1,51 @@
 #include "Graph.h"
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+
+
+using namespace std;
+
+int Graph::readNodesFile(const char * fileName) {
+	string line;
+	ifstream fin;
+
+	fin.open(fileName, ios_base::in);
+	if (!fin.is_open()) {
+		fin.clear();
+		return 0;
+	}
+
+	line = getline(fin, line);
+	cout << "Nacteny pocet uzlu: " << line << endl;
+}
 
 Graph::Graph(){
-	nodesCnt=0;
-	nodes=0;
+	nodesCnt = readNodesFile("graph.txt");
+	nodesMatrix = 0;
+
+	// init matrix with null
+	//for(int i = 0; i < )
 }
 
 Graph::~Graph(){
-	for(int i=0;i<nodesCnt;i++){
+	for(int i=0; i < nodesCnt; i++) {
 		delete nodes[i];	
 	}
 	delete nodes;
 }
 
-void Graph::parseFile(const char * filename){
-	std::string line ;
-   	std::ifstream infile( filename ) ;
-   	if ( infile ) {
-      		while ( getline( infile , line ) ) {
-	 		//parseLine
-		}
+void Graph::parseFile(const char * fileName){
+	string line;
+   	ifstream inFile(fileName);
+
+   	if(inFile) {
+   		while(getline(inFile, line)) {
+
+   		}
   	}
+
 	infile.close( ) ;
 }
 

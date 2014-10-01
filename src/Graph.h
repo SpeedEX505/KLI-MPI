@@ -7,11 +7,14 @@
 
 class Graph{
 	unsigned long nodesCnt;
-	int ** nodes;
+	int ** nodesMatrix;
+	// precte prvni radek ve filu -> pocet uzlu
+	int readNodesFile(const char * file);
 public:
 	Graph();
 	Graph(unsigned long nodesCnt);
 	~Graph();
+	// parse value in file to matrix
 	void parseFile(const char * filename);
 	void print();
 };
