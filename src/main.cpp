@@ -2,11 +2,12 @@
 
 #include "Graph.h"
 #include "Stack.h"
+#include "ProblemSolver.h"
 
 int main(int argc, char ** argv) {
 	Graph * g = new Graph("graph.txt");
 	g->print();
-
-
+	ProblemSolver ps(g);
+	ps.SolveProblem();
 	return 0;
 }

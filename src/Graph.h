@@ -1,7 +1,10 @@
 #ifndef Graph_H
 #define Graph_H
-#include <cstdio>
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <cstdio>
 #include <cstdlib>
 
 class Graph{
