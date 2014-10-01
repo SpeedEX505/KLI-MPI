@@ -2,13 +2,8 @@
 
 #include "Graph.h"
 
-//TODO: Parsing graph from file
-Graph* parseGraph(const char *file){
-	return new Graph(10);
-} 
-
 int main(int argc, char ** argv) {
-	Graph* g = parseGraph("graph.txt");
+	Graph* g = = new Graph();
 	g->print();
 	return 0;
 }

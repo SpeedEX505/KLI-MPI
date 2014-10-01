@@ -1,25 +1,35 @@
 #include "Graph.h"
 
-Graph::Graph(long nodesCnt){
-	this->nodesCnt=nodesCnt;
-	matrix = new char*[nodesCnt];
-	for(int i=0;i<nodesCnt;i++){
-		matrix[i]=new char[nodesCnt];	
-	}
+Graph::Graph(){
+	nodesCnt=0;
+	nodes=0;
 }
 
 Graph::~Graph(){
 	for(int i=0;i<nodesCnt;i++){
-		delete [] matrix[i];	
+		delete nodes[i];	
 	}
-	delete matrix;
+	delete nodes;
+}
+
+void Graph::parseFile(const char * filename){
+	std::string line ;
+   	std::ifstream infile( filename ) ;
+   	if ( infile ) {
+      		while ( getline( infile , line ) ) {
+	 		//parseLine
+		}
+  	}
+	infile.close( ) ;
 }
 
 void Graph::print(){
 	for(int i=0;i<nodesCnt;i++){
 		for(int j=0;j<nodesCnt;j++){
-			printf("%d ",matrix[i][j]);
+			nodes->printNode());
 		}
 		printf("\n");
 	}
 }
+
+

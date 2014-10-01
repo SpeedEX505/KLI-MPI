@@ -1,13 +1,18 @@
 #ifndef Graph_H
 #define Graph_H
 #include <cstdio>
+#include <iostream>
+#include <fstream>
+#include "Node.h"
 
 class Graph{
-	long nodesCnt;
-	char ** matrix;
+	unsigned long nodesCnt;
+	int ** nodes;
 public:
-	Graph(long nodesCnt);
+	Graph();
+	Graph(unsigned long nodesCnt);
 	~Graph();
+	void parseFile(const char * filename);
 	void print();
 };
 
