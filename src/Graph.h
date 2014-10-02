@@ -10,6 +10,9 @@
 class Graph{
 	unsigned long nodesCnt;
 	int ** nodesMatrix;
+	int rowMatrix;
+	int colMatrix;
+	
 	int readNodesCnt(const char * file); 		// reads number of nodes
 	int ** readNodesMatrix(const char * file);	// reads nodes into matrix
 public:
