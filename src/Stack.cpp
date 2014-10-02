@@ -1,14 +1,18 @@
 #include "Stack.h"
 
+#include <iostream>
+
 Stack::Stack(){
 	node = 0;
 	stackSize = 0;
 }
 
+
+
 void Stack::push(int value){
 	StackNode * newNode = new StackNode(value);
 	if (this->node == 0){
-		this->node = node;
+		this->node = newNode;
 	} else {
 		newNode->next = this->node;
 		this->node = newNode;
@@ -18,7 +22,7 @@ void Stack::push(int value){
 
 int Stack::pull(){
 	if (this->stackSize == 0){
-		printf("Stack is empty");
+		std::cerr << "Stack is empty\n";
 		return -1;
 	}
 
@@ -33,4 +37,12 @@ int Stack::pull(){
 
 	delete toDelete;
 	return value;
+}
+
+int Stack::getTop(){
+	if(this->node==0){
+		std::cerr << "Stack is empty\n";
+		return -1;	
+	}
+	return this->node->value;
 }

@@ -21,6 +21,7 @@ public:
 	Stack();
 	void push(int value);
 	int pull();
+	int getTop();
 };
 
 #endif
