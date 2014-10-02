@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "Graph.h"
-#include "Stack.h"
 #include "ProblemSolver.h"
+
 
 int main(int argc, char ** argv) {
 	Graph * g = new Graph("graph.txt");

@@ -46,3 +46,17 @@ int Stack::getTop(){
 	}
 	return this->node->value;
 }
+
+bool Stack::isEmpty(){
+	return (this->stackSize==0);
+}
+
+void Stack::printStack(){
+	StackNode * p = this->node;
+	std::cout<<"Stack: ";
+	while(p!=0){
+		std::cout<<p->value<<" ";
+		p=p->next;
+	}
+	std::cout<<std::endl;	
+}

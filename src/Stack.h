@@ -22,6 +22,8 @@ public:
 	void push(int value);
 	int pull();
 	int getTop();
+	bool isEmpty();
+	void printStack();
 };
 
 #endif
