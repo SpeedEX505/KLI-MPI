@@ -60,3 +60,18 @@ void Stack::printStack(){
 	}
 	std::cout<<std::endl;	
 }
+
+int Stack::getSize(){
+	return this->stackSize;
+}
+
+int * Stack::getArray(){
+	int * arr = new int[this->stackSize];
+	StackNode * p = node;
+	for(int i=stackSize-1;i>=0;i--){
+		arr[i]=p->value;
+		p=p->next;
+	}
+	return arr;
+}
+

@@ -24,6 +24,8 @@ public:
 	int getTop();
 	bool isEmpty();
 	void printStack();
+	int getSize();
+	int * getArray();
 };
 
 #endif

@@ -3,9 +3,8 @@
 
 
 class StateSpace{
-	//powerSet
 	public:
-	StateSpace(int size);
+	StateSpace(){}
 	
 };
 #endif

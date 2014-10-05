@@ -1,4 +1,5 @@
 #include "Graph.h"
+#include "Stack.h"
 
 using namespace std;
 
@@ -42,7 +43,7 @@ int** Graph::readNodesMatrix(const char * fileName) {
 	int lineCnt = 0;
 	std::getline(fin, line);
 	while (std::getline(fin, line)){
-		for (int i = 0; i < this->colMatrix; i++){
+		for (int i = 0; i < this->nodesCnt; i++){
 			matrix[lineCnt][i] = line.at(i) - 48; // char - possition to get number
 		}
 		lineCnt++;		
@@ -53,7 +54,7 @@ int** Graph::readNodesMatrix(const char * fileName) {
 
 //-------------------------------------------------------------------------------------------------
 Graph::Graph(const char * filename){
-	rowMatrix = colMatrix = nodesCnt = readNodesCnt(filename);
+	nodesCnt = readNodesCnt(filename);
 	nodesMatrix = readNodesMatrix(filename);
 }
 
@@ -64,14 +65,20 @@ Graph::~Graph(){
 	delete [] nodesMatrix;
 }
 
+int Graph::size() {
+	return nodesCnt;
+}
+
 void Graph::print(){
-	for (int i = 0; i < this->rowMatrix; i++){
+	for (int i = 0; i < this->nodesCnt; i++){
 		cout << "n" << i << ": ";
-		for (int j = 0; j < this->colMatrix; j++) {
+		for (int j = 0; j < this->nodesCnt; j++) {
 			cout << nodesMatrix[i][j] << " ";
 		}
 		cout << endl;
 	}
 }
 
-
+bool Graph::isConnected(int node1, int node2) {
+	return (nodesMatrix[node1][node2] == 1);
+}

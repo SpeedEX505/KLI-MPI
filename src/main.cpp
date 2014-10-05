@@ -6,7 +6,7 @@
 
 int main(int argc, char ** argv) {
 	Graph * g = new Graph("graph.txt");
-	g->print();
+//	g->print();
 
 	ProblemSolver ps(g);
 	ps.SolveProblem();

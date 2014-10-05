@@ -5,6 +5,7 @@
 #include <cstdlib>
 
 #include "Graph.h"
+#include "Stack.h"
 
 class ProblemSolver{
 	Graph* graph;
@@ -13,6 +14,7 @@ public:
 		this->graph=graph;
 	}
 	void SolveProblem();
+	bool isClique(Stack stack);
 };
 
 #endif
