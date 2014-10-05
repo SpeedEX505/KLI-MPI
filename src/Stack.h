@@ -13,6 +13,8 @@ public:
 	}
 };
 
+/** Klasicky zasobnik k ukladani cisla uzlu
+ */
 class Stack{
 private:
 	unsigned int stackSize;

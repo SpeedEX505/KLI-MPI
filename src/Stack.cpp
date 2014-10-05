@@ -7,8 +7,6 @@ Stack::Stack(){
 	stackSize = 0;
 }
 
-
-
 void Stack::push(int value){
 	StackNode * newNode = new StackNode(value);
 	if (this->node == 0){
@@ -28,11 +26,11 @@ int Stack::pull(){
 
 	StackNode * toDelete = this->node;
 	int value = this->node->value;
-	if (this->node->next == 0){
+	if (this->node->next == 0)
 		this->node = 0;
-	} else {
+	else 
 		this->node = this->node->next;	
-	}
+	
 	this->stackSize--;
 
 	delete toDelete;
@@ -40,7 +38,7 @@ int Stack::pull(){
 }
 
 int Stack::getTop(){
-	if(this->node==0){
+	if(this->node == 0){
 		std::cerr << "Stack is empty\n";
 		return -1;	
 	}
@@ -48,7 +46,7 @@ int Stack::getTop(){
 }
 
 bool Stack::isEmpty(){
-	return (this->stackSize==0);
+	return (this->stackSize == 0);
 }
 
 void Stack::printStack(){
@@ -67,10 +65,10 @@ int Stack::getSize(){
 
 int * Stack::getArray(){
 	int * arr = new int[this->stackSize];
-	StackNode * p = node;
-	for(int i=stackSize-1;i>=0;i--){
-		arr[i]=p->value;
-		p=p->next;
+	StackNode * p = this->node;
+	for(int i = (stackSize - 1); i >= 0; i--){
+		arr[i] = p->value;
+		p = p->next;
 	}
 	return arr;
 }
