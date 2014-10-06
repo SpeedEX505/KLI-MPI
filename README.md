@@ -33,3 +33,5 @@ Sekvenční algoritmus typu BB-DFS s hloubkou stavového stromu omezenou na n. C
 
 ##Paralelní algoritmus:
 Paralelní algoritmus je typu PBB-DFS-V.
+
+
