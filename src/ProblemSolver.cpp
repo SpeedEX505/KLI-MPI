@@ -64,14 +64,20 @@ void ProblemSolver::SolveProblem(){
 		if(stack->isEmpty())	break;
 		if(!returning && stack->getTop() < lastNode){
 			stack->push(stack->getTop() + 1);
-			isClique(stack);
+			if(isClique(stack) == false){
+				stack->pull();
+				returning = true;
+			}
 			continue;
 		}
-		if(returning && stack->getTop() < lastNode){
+		if(returning && stack->getTop() < lastNode){ // REFACTORING NEEDED
+		nextNode:
 			int value=stack->pull()+1;
 			stack->push(value);
 			returning = false;
-			isClique(stack);
+			if(isClique(stack) == false){
+				goto nextNode;
+			}
 			continue;
 		}
 		if(stack->getTop() == lastNode){
