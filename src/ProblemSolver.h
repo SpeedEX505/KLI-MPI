@@ -19,7 +19,8 @@ public:
 	MaxClique();
 	~MaxClique();
 	int sizeArray();
-	bool biggerThan(int size);
+	bool isBiggerThan(int size);
+	bool isSmallerThan(int size);
 	void addArrayNodes(int * array, int size);
 	void printArrayNodes();
 };
@@ -34,7 +35,7 @@ class ProblemSolver{
 public:
 	ProblemSolver(Graph * graph);
 	void SolveProblem();
-	bool isClique(Stack stack);
+	bool isClique(Stack * stack);
 	void printMaxClique();
 };
 

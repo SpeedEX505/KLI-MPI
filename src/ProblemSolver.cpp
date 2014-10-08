@@ -28,8 +28,12 @@ int MaxClique::sizeArray(){
 	return this->size;
 }
 
-bool MaxClique::biggerThan(int size){
+bool MaxClique::isBiggerThan(int size){
 	return (this->size > size);
+}
+
+bool MaxClique::isSmallerThan(int size){
+	return (this->size < size);
 }
 
 void MaxClique::addArrayNodes(int * array, int size){
@@ -49,29 +53,29 @@ ProblemSolver::ProblemSolver(Graph* graph){
 }
 
 void ProblemSolver::SolveProblem(){
-	Stack stack;
+	Stack * stack = new Stack();
 	int lastNode = graph->size()-1;	
-	stack.push(0);
-	stack.printStack();
+	stack->push(0);
+	stack->printStack();
 	bool returning = false;
 	cout << endl;
 
 	while(true){
-		if(stack.isEmpty())	break;
-		if(!returning && stack.getTop() < lastNode){
-			stack.push(stack.getTop() + 1);
+		if(stack->isEmpty())	break;
+		if(!returning && stack->getTop() < lastNode){
+			stack->push(stack->getTop() + 1);
 			isClique(stack);
 			continue;
 		}
-		if(returning && stack.getTop() < lastNode){
-			int value=stack.pull()+1;
-			stack.push(value);
+		if(returning && stack->getTop() < lastNode){
+			int value=stack->pull()+1;
+			stack->push(value);
 			returning = false;
 			isClique(stack);
 			continue;
 		}
-		if(stack.getTop() == lastNode){
-			stack.pull();
+		if(stack->getTop() == lastNode){
+			stack->pull();
 			returning=true;
 			continue;
 		}
@@ -81,9 +85,9 @@ void ProblemSolver::SolveProblem(){
 	cout << endl;
 }
 
-bool ProblemSolver::isClique(Stack stack){
-	int arrSize = stack.getSize();
-	int *values = stack.getArray();
+bool ProblemSolver::isClique(Stack * stack){
+	int arrSize = stack->getSize();
+	int *values = stack->getArray();
 	
 	for(int i = 0; i < arrSize; i++){
 		for(int j = 0; j < arrSize; j++){
@@ -94,11 +98,11 @@ bool ProblemSolver::isClique(Stack stack){
 			}
 		}
 	}
-	if (!maxClique.biggerThan(arrSize))
+	if (maxClique.isSmallerThan(arrSize)){
 		maxClique.addArrayNodes(values, arrSize);
-
-	cout << "Clique founded, size(" << arrSize << ")" << endl;
-	stack.printStack();
+		cout << "Bigger clique founded, size(" << arrSize << ")" << endl;
+		stack->printStack();
+	}
 
 	delete [] values;
 	return true;
