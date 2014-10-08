@@ -7,6 +7,16 @@ Stack::Stack(){
 	stackSize = 0;
 }
 
+Stack::~Stack(){
+	StackNode *p =node;
+	StackNode *toDelete;	
+	while(p!=0){
+		toDelete=p;
+		p=p->next;
+		delete toDelete;
+	}
+}
+
 void Stack::push(int value){
 	StackNode * newNode = new StackNode(value);
 	if (this->node == 0){

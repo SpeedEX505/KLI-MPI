@@ -21,6 +21,7 @@ private:
 	StackNode * node;
 public:
 	Stack();
+	~Stack();
 	void push(int value);
 	int pull();
 	int getTop();

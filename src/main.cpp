@@ -11,5 +11,6 @@ int main(int argc, char ** argv) {
 	ProblemSolver ps(g);
 	ps.SolveProblem();
 	
+	delete g;	
 	return 0;
 }

@@ -89,6 +89,7 @@ bool ProblemSolver::isClique(Stack stack){
 		for(int j = 0; j < arrSize; j++){
 			if(i == j) continue;
 			if(graph->isConnected(values[i], values[j]) == false){
+				delete []values;
 				return false;
 			}
 		}

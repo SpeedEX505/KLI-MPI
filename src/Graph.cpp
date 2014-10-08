@@ -60,7 +60,7 @@ Graph::Graph(const char * filename){
 
 Graph::~Graph(){
 	for(int i = 0; i < nodesCnt; i++) {
-		delete nodesMatrix[i];	
+		delete [] nodesMatrix[i];	
 	}
 	delete [] nodesMatrix;
 }
