@@ -54,13 +54,14 @@ ProblemSolver::ProblemSolver(Graph* graph){
 
 void ProblemSolver::SolveProblem(){
 	Stack * stack = new Stack();
-	int lastNode = graph->size()-1;	
+	int lastNode = graph->size() - 1;	// n - 1
 	stack->push(0);
 	stack->printStack();
 	bool returning = false;
 	cout << endl;
 
 	while(true){
+		// 1. condition
 		if(stack->isEmpty())	break;
 		if(!returning && stack->getTop() < lastNode){
 			stack->push(stack->getTop() + 1);
@@ -70,9 +71,10 @@ void ProblemSolver::SolveProblem(){
 			}
 			continue;
 		}
+		// 2. condition
 		if(returning && stack->getTop() < lastNode){ // REFACTORING NEEDED
 		nextNode:
-			int value=stack->pull()+1;
+			int value = stack->pull()+1;
 			stack->push(value);
 			returning = false;
 			if(isClique(stack) == false){
@@ -80,6 +82,7 @@ void ProblemSolver::SolveProblem(){
 			}
 			continue;
 		}
+		// 3. condition
 		if(stack->getTop() == lastNode){
 			stack->pull();
 			returning=true;
@@ -93,7 +96,7 @@ void ProblemSolver::SolveProblem(){
 
 bool ProblemSolver::isClique(Stack * stack){
 	int arrSize = stack->getSize();
-	int *values = stack->getArray();
+	int * values = stack->getArray();
 	
 	for(int i = 0; i < arrSize; i++){
 		for(int j = 0; j < arrSize; j++){
@@ -104,6 +107,7 @@ bool ProblemSolver::isClique(Stack * stack){
 			}
 		}
 	}
+
 	if (maxClique.isSmallerThan(arrSize)){
 		maxClique.addArrayNodes(values, arrSize);
 		cout << "Bigger clique founded, size(" << arrSize << ")" << endl;

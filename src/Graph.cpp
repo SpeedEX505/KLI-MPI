@@ -26,9 +26,8 @@ int Graph::readNodesCnt(const char * fileName) {
 
 int** Graph::readNodesMatrix(const char * fileName) {
 	int ** matrix = new int*[nodesCnt];
-	for (int i = 0; i < nodesCnt; i++){
+	for (int i = 0; i < nodesCnt; i++)
 		matrix[i] = new int[nodesCnt];
-	}
 
 	// open file stream
 	ifstream fin;
@@ -43,9 +42,8 @@ int** Graph::readNodesMatrix(const char * fileName) {
 	int lineCnt = 0;
 	std::getline(fin, line);
 	while (std::getline(fin, line)){
-		for (int i = 0; i < this->nodesCnt; i++){
+		for (int i = 0; i < this->nodesCnt; i++)
 			matrix[lineCnt][i] = line.at(i) - 48; // char - possition to get number
-		}
 		lineCnt++;		
 	}
 	fin.close();
@@ -59,9 +57,9 @@ Graph::Graph(const char * filename){
 }
 
 Graph::~Graph(){
-	for(int i = 0; i < nodesCnt; i++) {
+	cout << "Graph destruktor" << endl;
+	for(int i = 0; i < nodesCnt; i++)
 		delete [] nodesMatrix[i];	
-	}
 	delete [] nodesMatrix;
 }
 
@@ -72,9 +70,8 @@ int Graph::size() {
 void Graph::print(){
 	for (int i = 0; i < this->nodesCnt; i++){
 		cout << "n" << i << ": ";
-		for (int j = 0; j < this->nodesCnt; j++) {
+		for (int j = 0; j < this->nodesCnt; j++)
 			cout << nodesMatrix[i][j] << " ";
-		}
 		cout << endl;
 	}
 }

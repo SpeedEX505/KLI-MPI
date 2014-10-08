@@ -1,6 +1,7 @@
 #include "Stack.h"
 
 #include <iostream>
+using namespace std;
 
 Stack::Stack(){
 	node = 0;
@@ -8,23 +9,21 @@ Stack::Stack(){
 }
 
 Stack::~Stack(){
-	StackNode *p =node;
-	StackNode *toDelete;	
-	while(p!=0){
-		toDelete=p;
-		p=p->next;
+	StackNode * p = node;
+	StackNode * toDelete;	
+	while(p != 0){
+		toDelete = p;
+		p = p->next;
 		delete toDelete;
 	}
 }
 
 void Stack::push(int value){
-	StackNode * newNode = new StackNode(value);
-	if (this->node == 0){
-		this->node = newNode;
-	} else {
-		newNode->next = this->node;
-		this->node = newNode;
-	}
+	// StackNode * newNode = new StackNode(value);
+	if (this->node == 0)
+		this->node = new StackNode(value, NULL);
+	else
+		this->node = new StackNode(value, this->node);
 	this->stackSize++;
 }
 
