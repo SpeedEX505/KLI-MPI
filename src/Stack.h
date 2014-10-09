@@ -7,9 +7,9 @@ public:
 	int value;
 	StackNode * next;
 
-	StackNode(int value, StackNode * next){
+	StackNode(int value){
 		this->value = value;
-		this->next = next;	// eq. null
+		this->next = 0;	// eq. null
 	}
 };
 

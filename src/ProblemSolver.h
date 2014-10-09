@@ -30,7 +30,7 @@ public:
  * 
  */
 class ProblemSolver{
-	Graph * graph;
+	Graph* graph;
 	MaxClique maxClique;
 public:
 	ProblemSolver(Graph * graph);
