@@ -83,6 +83,7 @@ void ProblemSolver::SolveProblem(){
 		}
 	}
 
+	delete stack;
 	this->printMaxClique();
 	cout << endl;
 }
