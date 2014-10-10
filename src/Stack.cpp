@@ -8,24 +8,22 @@ Stack::Stack(){
 }
 
 Stack::~Stack(){
-	StackNode *p =node;
-	StackNode *toDelete;	
+	StackNode * p =node;
+	StackNode * toDelete;	
 	while(p!=0){
-		toDelete=p;
-		p=p->next;
+		toDelete = p;
+		p = p->next;
 		delete toDelete;
 	}
 }
 
 void Stack::push(int value){
-	StackNode * newNode = new StackNode(value);
 	if (this->node == 0){
-		this->node = newNode;
+		this->node = new StackNode(value,0);
 	} else {
-		newNode->next = this->node;
-		this->node = newNode;
+		this->node = new StackNode(value,this->node);
 	}
-	this->stackSize++;
+	(this->stackSize)++;
 }
 
 int Stack::pull(){
@@ -41,7 +39,7 @@ int Stack::pull(){
 	else 
 		this->node = this->node->next;	
 	
-	this->stackSize--;
+	(this->stackSize)--;
 
 	delete toDelete;
 	return value;

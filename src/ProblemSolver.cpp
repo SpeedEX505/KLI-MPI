@@ -56,33 +56,29 @@ void ProblemSolver::SolveProblem(){
 	Stack * stack = new Stack();
 	int lastNode = graph->size()-1;	
 	stack->push(0);
-	stack->printStack();
-	bool returning = false;
-	cout << endl;
+	int lastDeleted=-1;
 
 	while(true){
 		if(stack->isEmpty())	break;
-		if(!returning && stack->getTop() < lastNode){
-			stack->push(stack->getTop() + 1);
-			if(isClique(stack) == false){
-				stack->pull();
-				returning = true;
+		if(stack->getTop() < lastNode){
+			int toPush=lastDeleted;			
+			if(toPush==-1){
+				toPush=stack->getTop()+1;
+			}else{
+				if(++toPush>lastNode){
+					lastDeleted=stack->pull();
+					continue;
+				}
 			}
-			continue;
-		}
-		if(returning && stack->getTop() < lastNode){ // REFACTORING NEEDED
-		nextNode:
-			int value=stack->pull()+1;
-			stack->push(value);
-			returning = false;
+			stack->push(toPush);
+			lastDeleted=-1;
 			if(isClique(stack) == false){
-				goto nextNode;
+				lastDeleted=stack->pull();
 			}
 			continue;
 		}
 		if(stack->getTop() == lastNode){
-			stack->pull();
-			returning=true;
+			lastDeleted=stack->pull();
 			continue;
 		}
 	}
