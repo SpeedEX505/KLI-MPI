@@ -5,12 +5,13 @@
 
 
 int main(int argc, char ** argv) {
+
 	Graph * g = new Graph("graph.txt");
 	g->print();
 
 	ProblemSolver ps(g);
 	ps.SolveProblem();
 	
-	delete g;	
+	delete g;
 	return 0;
 }
