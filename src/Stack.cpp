@@ -7,6 +7,14 @@ Stack::Stack(){
 	stackSize = 0;
 }
 
+Stack::Stack(int * serializedStack){
+	stackSize=serializedStack[0];
+	node=0;
+	for(int i=1;i<stackSize+1;i++){
+		node = new StackNode(serializedStack[i],node);
+	}
+}
+
 Stack::~Stack(){
 	StackNode * p =node;
 	StackNode * toDelete;	
@@ -15,6 +23,17 @@ Stack::~Stack(){
 		p = p->next;
 		delete toDelete;
 	}
+}
+
+int * Stack::serialize(){
+	int * array = new int[stackSize+1]; 
+	array[0]=stackSize;
+	StackNode *p =node;
+	for(int i=stackSize;i>0;i--){
+		array[i]=p->value;
+		p=p->next;
+	}
+	return array;
 }
 
 void Stack::push(int value){

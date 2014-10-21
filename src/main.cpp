@@ -21,7 +21,6 @@ int main(int argc, char ** argv) {
 	// vsichni procesy maji praci nyni se muzou zacit chovat rovnocene a pocitat do zblazneni
 	//zavolani nejaky funkce ps.compute();
 
-
 	//TODO ADUV
 	delete g;
 	MPI_Finalize();

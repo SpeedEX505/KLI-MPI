@@ -21,6 +21,7 @@ private:
 	StackNode * node;
 public:
 	Stack();
+	Stack(int * serializedStack);
 	~Stack();
 	void push(int value);
 	int pull();
@@ -29,6 +30,7 @@ public:
 	void printStack();
 	int getSize();
 	int * getArray();
+	int * serialize();
 };
 
 #endif
