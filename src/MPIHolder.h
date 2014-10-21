@@ -12,7 +12,7 @@ class MPIHolder{
 	int cpuCounter;
 
 	private:
-	MPIHolder();
+	MPIHolder(){};
  	MPIHolder(MPIHolder const&);	 // Don't Implement
         void operator=(MPIHolder const&);// Don't implement
 	static MPIHolder * instance;
