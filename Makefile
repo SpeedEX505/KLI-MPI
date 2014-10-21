@@ -1,5 +1,5 @@
 #macros
-CC=g++
+CC=mpiCC
 CCFLAGS=
 LBFLAGS=
 Remove=rm -rf
