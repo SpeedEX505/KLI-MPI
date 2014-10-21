@@ -1,6 +1,8 @@
 #ifndef MPIHolder_H
 #define MPIHolder_H
 
+#define FLAG_GET_JOB 100
+#define FLAG_SENT_JOB 101
 
 class MPIHolder{
 	public:
