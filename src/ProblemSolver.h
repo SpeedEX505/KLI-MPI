@@ -32,10 +32,15 @@ public:
 class ProblemSolver{
 	Graph* graph;
 	MaxClique maxClique;
+	Stack * getNewWork();
+	bool checkWorkAdepts();
+	bool isClique(Stack * stack);
+
 public:
 	ProblemSolver(Graph * graph);
 	void SolveProblem();
-	bool isClique(Stack * stack);
+	void sendWorkAtStart();
+	void listenAtStart();
 	void printMaxClique();
 };
 

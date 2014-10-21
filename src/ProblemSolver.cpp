@@ -52,6 +52,11 @@ ProblemSolver::ProblemSolver(Graph* graph){
 	this->graph = graph;
 }
 
+/* Je třeba vytvořit funkci pracujici na stejnem principu, která projde pouze dany podstrom stavového prostoru.
+ * Podstrom je daný zasobníkem a předava se jako parametr.
+ * Funkce se nesmí vracet ve stromu zpátky více než po počáteční uzel(pozna se dle parametru), místo toho si žádá o další práci. Pouze master proces obsahuje prázdný uzel 
+ * Na zacatku se musí neblokujicim způsobem podívat zda někdo nežádá práci. (funkce bool checkWorkAdepts())
+ */
 void ProblemSolver::SolveProblem(){
 	Stack * stack = new Stack();
 	int lastNode = graph->size()-1;	
@@ -88,6 +93,34 @@ void ProblemSolver::SolveProblem(){
 	cout << endl;
 }
 
+
+
+void ProblemSolver::sendWorkAtStart(){
+	/* 
+	* Na zacatku posle praci ostatnim procesorum. Aby fungoval random vyber pri dotazovani se na praci.
+	* Sam si necha zbylou praci pro sebe.
+	* Je nutne rozesilat praci tak, aby si nemusel pamatovat co odeslal a co ne. Tedy posílat zleva
+	* dokud jsou volne procesory a sobe nechat praci nejvice napravo
+	* pro distribuci vyuziva parametr cpuCount z singletonu MPIHolder (kvuli tomu je mozna treba bariera, ale je mozne udelat reseni i bez ni)
+ 	*/
+}
+
+void ProblemSolver::listenAtStart(){
+	/*
+	* Na zacatku je treba ziskat praci.
+	*/	
+
+}
+
+Stack * ProblemSolver::getNewWork(){
+	// žádá procesy o novou práci. Jako návratová hodnota je zásobník, který je možné rovnou použít pro řešení
+} 
+
+bool ProblemSolver::checkWorkAdepts(){
+	// funkce zkontroluje adepty na praci. Pokud obsahuje zadost o praci. Prideli mu tu co by mel ted delat a vrati true. Jinak vraci false.
+	// Navratova hodnota je dulezita pro pripadne vraceni ve stromu a pokracovani v praci.
+}
+
 bool ProblemSolver::isClique(Stack * stack){
 	int arrSize = stack->getSize();
 	int *values = stack->getArray();
@@ -103,8 +136,6 @@ bool ProblemSolver::isClique(Stack * stack){
 	}
 	if (maxClique.isSmallerThan(arrSize)){
 		maxClique.addArrayNodes(values, arrSize);
-		cout << "Bigger clique founded, size(" << arrSize << ")" << endl;
-		stack->printStack();
 	}
 
 	delete [] values;
