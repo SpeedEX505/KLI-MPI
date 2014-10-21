@@ -3,7 +3,7 @@ CC=mpiCC
 CCFLAGS=
 LBFLAGS=
 Remove=rm -rf
-Objects=src/objects/main.o src/objects/Graph.o src/objects/Stack.o src/objects/ProblemSolver.o src/objects/StateSpace.o
+Objects=src/objects/main.o src/objects/Graph.o src/objects/Stack.o src/objects/ProblemSolver.o
 RUN=./kli
 GRAPHFILE=graph.txt
 CPATH=src/objects/
@@ -39,8 +39,4 @@ src/objects/Stack.o: src/Stack.cpp src/Stack.h
 src/objects/ProblemSolver.o: src/ProblemSolver.cpp src/ProblemSolver.h
 	mkdir -p src/objects
 	$(CC) $(CCFLAGS) -c src/ProblemSolver.cpp -o src/objects/ProblemSolver.o $(LBFLAGS)
-
-src/objects/StateSpace.o: src/StateSpace.cpp src/StateSpace.h
-	mkdir -p src/objects
-	$(CC) $(CCFLAGS) -c src/StateSpace.cpp -o src/objects/StateSpace.o $(LBFLAGS)
 
