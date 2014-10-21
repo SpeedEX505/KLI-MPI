@@ -59,7 +59,7 @@ void ProblemSolver::SolveProblem(){
 	int lastDeleted=-1;
 
 	while(true){
-		if(stack->isEmpty())	break;
+		if(stack->isEmpty()&&lastDeleted==lastNode)break;
 		if(stack->getTop() < lastNode){
 			int toPush=lastDeleted;			
 			if(toPush==-1){
