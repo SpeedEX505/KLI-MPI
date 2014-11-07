@@ -6,6 +6,8 @@
 
 #include "Graph.h"
 #include "Stack.h"
+#include "MPIHolder.h"
+#include "mpi.h"
 
 /** Uchovani nejvetsi kliky
  */
@@ -31,6 +33,7 @@ public:
  */
 class ProblemSolver{
 	Graph* graph;
+	Stack * stack;
 	MaxClique maxClique;
 	Stack * getNewWork();
 	bool checkWorkAdepts();
@@ -41,6 +44,8 @@ public:
 	void SolveProblem();
 	void sendWorkAtStart();
 	void listenAtStart();
+	void startComputing();
+	void aduv();
 	void printMaxClique();
 };
 

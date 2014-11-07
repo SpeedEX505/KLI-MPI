@@ -1,5 +1,6 @@
 #include "Graph.h"
 #include "Stack.h"
+#include "MPIHolder.h"
 
 using namespace std;
 
@@ -55,6 +56,7 @@ int** Graph::readNodesMatrix(const char * fileName) {
 //-------------------------------------------------------------------------------------------------
 Graph::Graph(const char * filename){
 	nodesCnt = readNodesCnt(filename);
+	MPIHolder::getInstance().stackMaxSize=nodesCnt+1;
 	nodesMatrix = readNodesMatrix(filename);
 }
 

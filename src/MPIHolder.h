@@ -2,7 +2,9 @@
 #define MPIHolder_H
 
 #define FLAG_GET_JOB 100
-#define FLAG_SENT_JOB 101
+#define FLAG_SEND_JOB 101
+#define FLAG_JOB_ACCEPTED 102
+#define FLAG_NO_JOB 103
 
 class MPIHolder{
 	public:
@@ -12,6 +14,7 @@ class MPIHolder{
 	}
 	int myRank;
 	int cpuCounter;
+	int stackMaxSize;
 
 	private:
 	MPIHolder(){};

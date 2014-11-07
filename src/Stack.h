@@ -2,23 +2,11 @@
 #define Stack_H
 #include <cstdio>
 
-class StackNode{
-public:
-	int value;
-	StackNode * next;
-
-	StackNode(int value, StackNode * next){
-		this->value = value;
-		this->next = next;	// eq. null
-	}
-};
-
 /** Klasicky zasobnik k ukladani cisla uzlu
  */
 class Stack{
 private:
-	unsigned int stackSize;
-	StackNode * node;
+	int * array;
 public:
 	Stack();
 	Stack(int * serializedStack);

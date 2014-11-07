@@ -96,25 +96,51 @@ void ProblemSolver::SolveProblem(){
 
 
 void ProblemSolver::sendWorkAtStart(){
-	/* 
-	* Na zacatku posle praci ostatnim procesorum. Aby fungoval random vyber pri dotazovani se na praci.
-	* Sam si necha zbylou praci pro sebe.
-	* Je nutne rozesilat praci tak, aby si nemusel pamatovat co odeslal a co ne. Tedy posílat zleva
-	* dokud jsou volne procesory a sobe nechat praci nejvice napravo
-	* pro distribuci vyuziva parametr cpuCount z singletonu MPIHolder (kvuli tomu je mozna treba bariera, ale je mozne udelat reseni i bez ni)
- 	*/
+	int cpuCnt=MPIHolder::getInstance().cpuCounter;
+	int destinationCPU=1;	
+	stack = new Stack();
+	int lastNode = graph->size()-1;
+	int lastDeleted=-1;
+
+	while(true){
+		stack->push(lastDeleted+1);
+		if(destinationCPU<cpuCnt){
+			MPI_Send (stack->serialize(), MPIHolder::getInstance().stackMaxSize, MPI_INT, destinationCPU, FLAG_SEND_JOB, MPI_COMM_WORLD);
+			cout<<"sending job to CPU"<<destinationCPU<<endl;
+			lastDeleted=stack->pull();
+			destinationCPU++;
+		}else{
+			break;		
+		}
+	}
 }
 
 void ProblemSolver::listenAtStart(){
-	/*
-	* Na zacatku je treba ziskat praci.
-	*/	
-
+	int * array;
+	MPI_Status status;
+	MPI_Recv(array, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, FLAG_SEND_JOB, MPI_COMM_WORLD, &status);
+	cout<<"receiving job"<<endl;
+	//stack = new Stack(array);
+	//delete []array;
 }
+
+void ProblemSolver::startComputing(){
+	/*
+	TODO začít symetricky výpočet
+	*/
+}
+
+void ProblemSolver::aduv(){
+	/*
+	TODO aduv algorithm
+	*/
+}
+
 
 Stack * ProblemSolver::getNewWork(){
 	// žádá procesy o novou práci. Jako návratová hodnota je zásobník, který je možné rovnou použít pro řešení
-} 
+}
+
 
 bool ProblemSolver::checkWorkAdepts(){
 	// funkce zkontroluje adepty na praci. Pokud obsahuje zadost o praci. Prideli mu tu co by mel ted delat a vrati true. Jinak vraci false.
