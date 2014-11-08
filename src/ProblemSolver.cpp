@@ -101,11 +101,14 @@ void ProblemSolver::sendWorkAtStart(){
 	stack = new Stack();
 	int lastNode = graph->size()-1;
 	int lastDeleted=-1;
-
+	
+	
+	
 	while(true){
 		stack->push(lastDeleted+1);
 		if(destinationCPU<cpuCnt){
-			MPI_Send (stack->serialize(), MPIHolder::getInstance().stackMaxSize, MPI_INT, destinationCPU, FLAG_SEND_JOB, MPI_COMM_WORLD);
+			int * array=stack->serialize();
+			MPI_Send (array, MPIHolder::getInstance().stackMaxSize, MPI_INT, destinationCPU, FLAG_SEND_JOB, MPI_COMM_WORLD);
 			cout<<"sending job to CPU"<<destinationCPU<<endl;
 			lastDeleted=stack->pull();
 			destinationCPU++;
@@ -119,7 +122,7 @@ void ProblemSolver::listenAtStart(){
 	int * array;
 	MPI_Status status;
 	MPI_Recv(array, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, FLAG_SEND_JOB, MPI_COMM_WORLD, &status);
-	cout<<"receiving job"<<endl;
+	cout<<"receiving job("<<MPIHolder::getInstance().myRank<<"):[0]="<<array[0]<<", [1]="<<array[1]<<endl;
 	//stack = new Stack(array);
 	//delete []array;
 }
