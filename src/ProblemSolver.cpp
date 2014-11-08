@@ -94,22 +94,20 @@ void ProblemSolver::SolveProblem(){
 }
 
 
-
+//Kontrola na pocet uzlu a ochrana proti (vice uzlu nez prace)
 void ProblemSolver::sendWorkAtStart(){
+	cout<<"CPU"<<MPIHolder::getInstance().myRank<<": Sending work at start..."<<endl;
 	int cpuCnt=MPIHolder::getInstance().cpuCounter;
 	int destinationCPU=1;	
 	stack = new Stack();
 	int lastNode = graph->size()-1;
 	int lastDeleted=-1;
 	
-	
-	
 	while(true){
 		stack->push(lastDeleted+1);
 		if(destinationCPU<cpuCnt){
 			int * array=stack->serialize();
 			MPI_Send (array, MPIHolder::getInstance().stackMaxSize, MPI_INT, destinationCPU, FLAG_SEND_JOB, MPI_COMM_WORLD);
-			cout<<"sending job to CPU"<<destinationCPU<<endl;
 			lastDeleted=stack->pull();
 			destinationCPU++;
 		}else{
@@ -117,23 +115,24 @@ void ProblemSolver::sendWorkAtStart(){
 		}
 	}
 }
-
+//Kontrola na pocet uzlu a proti (vice uzlu nez prace)
 void ProblemSolver::listenAtStart(){
-	int * array;
+	cout<<"CPU"<<MPIHolder::getInstance().myRank<<": Listening at start..."<<endl;
+	int array[MPIHolder::getInstance().stackMaxSize];
 	MPI_Status status;
-	MPI_Recv(array, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, FLAG_SEND_JOB, MPI_COMM_WORLD, &status);
-	cout<<"receiving job("<<MPIHolder::getInstance().myRank<<"):[0]="<<array[0]<<", [1]="<<array[1]<<endl;
-	//stack = new Stack(array);
-	//delete []array;
+	MPI_Recv(&array, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, FLAG_SEND_JOB, MPI_COMM_WORLD, &status);
+	stack = new Stack(array);
 }
 
 void ProblemSolver::startComputing(){
+	stack->printStack();
 	/*
 	TODO začít symetricky výpočet
 	*/
 }
 
 void ProblemSolver::aduv(){
+	cout<<"aduv started"<<endl;
 	/*
 	TODO aduv algorithm
 	*/
