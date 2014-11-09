@@ -19,6 +19,19 @@ Stack::~Stack(){
 	delete [] array;
 }
 
+bool equals(Stack * stack){
+	bool eq=true;
+	int * arrayA=this->serialize();
+	int * arrayB=stack->serialize();
+	if(arrayA[0]!=arrayB[0]) {eq=false;break;}
+	for(int i=1;i<=arrayA[0];i++){
+		if(arrayA[i]!=arrayB[i]) {eq=false;break;
+	}
+	delete [] arrayA;
+	delete [] arrayB;
+	return eq;
+}
+
 int * Stack::serialize(){
 	return array;
 }

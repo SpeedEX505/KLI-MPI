@@ -11,6 +11,7 @@ public:
 	Stack();
 	Stack(int * serializedStack);
 	~Stack();
+	bool equals(Stack * stack);
 	void push(int value);
 	int pull();
 	int getTop();

@@ -94,6 +94,45 @@ void ProblemSolver::SolveProblem(){
 }
 
 
+//TODO dodělat
+void ProblemSolver::solveSubtree(Stack * stackEnd){
+	lastDeleted=-1;
+	do{
+		if(checkWorkAdpets()){
+			lastDeleted=stack->pull();
+			continue;
+		}
+		if(stack->getTop() < lastNode){
+			int toPush=lastDeleted;			
+			if(toPush==-1){
+				toPush=stack->getTop()+1;
+			}else{
+				if(++toPush>lastNode){
+					lastDeleted=stack->pull();
+					continue;
+				}
+			}
+			stack->push(toPush);
+			lastDeleted=-1;
+			if(isClique(stack) == false){
+				lastDeleted=stack->pull();
+			}
+			continue;
+		}
+		if(stack->getTop() == lastNode){
+			lastDeleted=stack->pull();
+			continue;
+		}
+
+
+
+
+	}while(!stack->equals(stackEnd))
+
+}
+
+
+
 //Kontrola na pocet uzlu a ochrana proti (vice uzlu nez prace)
 void ProblemSolver::sendWorkAtStart(){
 	cout<<"CPU"<<MPIHolder::getInstance().myRank<<": Sending work at start..."<<endl;
@@ -134,14 +173,9 @@ void ProblemSolver::listenAtStart(){
 }
 
 void ProblemSolver::startComputing(){
-	if(!stack->isEmpty()){
-		stack->printStack();
-	}else{
-		cout<<"I have empty stack"<<endl;
-	}	
-	/*
-	TODO začít symetricky výpočet
-	*/
+	while(true){
+		SolveSubtree(stack);
+	}
 }
 
 void ProblemSolver::aduv(){
@@ -160,6 +194,7 @@ Stack * ProblemSolver::getNewWork(){
 bool ProblemSolver::checkWorkAdepts(){
 	// funkce zkontroluje adepty na praci. Pokud obsahuje zadost o praci. Prideli mu tu co by mel ted delat a vrati true. Jinak vraci false.
 	// Navratova hodnota je dulezita pro pripadne vraceni ve stromu a pokracovani v praci.
+	return false;
 }
 
 bool ProblemSolver::isClique(Stack * stack){
