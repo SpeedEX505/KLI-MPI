@@ -105,6 +105,9 @@ void ProblemSolver::sendWorkAtStart(){
 	
 	while(true){
 		stack->push(lastDeleted+1);
+		if(lastDeleted+1==lastNode){
+			break;
+		}
 		if(destinationCPU<cpuCnt){
 			int * array=stack->serialize();
 			MPI_Send (array, MPIHolder::getInstance().stackMaxSize, MPI_INT, destinationCPU, FLAG_SEND_JOB, MPI_COMM_WORLD);
@@ -114,8 +117,14 @@ void ProblemSolver::sendWorkAtStart(){
 			break;		
 		}
 	}
+	int * pomArray = new int[MPIHolder::getInstance().stackMaxSize];
+	pomArray[0]=0;
+	while(destinationCPU<cpuCnt){
+		MPI_Send(pomArray,MPIHolder::getInstance().stackMaxSize,MPI_INT,destinationCPU,FLAG_SEND_JOB,MPI_COMM_WORLD);
+		destinationCPU++;
+	}
+	delete [] pomArray;
 }
-//Kontrola na pocet uzlu a proti (vice uzlu nez prace)
 void ProblemSolver::listenAtStart(){
 	cout<<"CPU"<<MPIHolder::getInstance().myRank<<": Listening at start..."<<endl;
 	int array[MPIHolder::getInstance().stackMaxSize];
@@ -125,7 +134,11 @@ void ProblemSolver::listenAtStart(){
 }
 
 void ProblemSolver::startComputing(){
-	stack->printStack();
+	if(!stack->isEmpty()){
+		stack->printStack();
+	}else{
+		cout<<"I have empty stack"<<endl;
+	}	
 	/*
 	TODO začít symetricky výpočet
 	*/
