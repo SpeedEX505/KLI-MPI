@@ -21,8 +21,8 @@ int main(int argc, char ** argv) {
 	MPI_Barrier(MPI_COMM_WORLD); // prace je rozdistribuvovana
 	// vsichni procesy maji praci nyni se muzou zacit chovat rovnocene a pocitat do zblazneni	
 	ps.startComputing();
-	//TODO ADUV
-	ps.aduv();
+
+	//ps.printResults();
 	delete g;
 	MPI_Finalize();
 	return 0;

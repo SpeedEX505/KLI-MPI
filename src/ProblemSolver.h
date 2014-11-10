@@ -9,6 +9,12 @@
 #include "MPIHolder.h"
 #include "mpi.h"
 
+#define STATE_ACTIVE 500
+#define STATE_IDLE 501
+
+#define TOKEN_WHITE 1000
+#define TOKEN_BLACK 1001
+
 /** Uchovani nejvetsi kliky
  */
 class MaxClique{
@@ -20,7 +26,7 @@ private:
 public:
 	MaxClique();
 	~MaxClique();
-	int sizeArray();
+	int getSize();
 	bool isBiggerThan(int size);
 	bool isSmallerThan(int size);
 	void addArrayNodes(int * array, int size);
@@ -33,19 +39,34 @@ public:
  */
 class ProblemSolver{
 	Graph* graph;
-	Stack * stack;
+	Stack* stack;
 	MaxClique maxClique;
-	Stack * getNewWork();
-	bool checkWorkAdepts();
+
+	int state; 		// stav procesoru
+	int tokenColor;		// barva
+	bool terminate;		// skoncil aduv?
+	int * token;
+	int lastAsked;		// naposledy dotazovaný procesor (getJob)
+	int endSize;		// ukoncovaci podminka solveSubtree
+
+	Stack* divideStack();
+	Stack* getNewWork();
+	void checkMessages();	// Přijme zprávy a obslouží je
+
+	void Token(int * buffer);
+	void JobRequest(int * buffer, int source);
+	void JobReceived(int * buffer);
+		
+
 	bool isClique(Stack * stack);
-	void solveSubtree(Stack * stack);
+	void solveSubtree();
+	int askerID();		//získa id procesu, ktereho se ma zeptat na praci;
 public:
 	ProblemSolver(Graph * graph);
-	void SolveProblem();
-	void sendWorkAtStart();
-	void listenAtStart();
-	void startComputing();
-	void aduv();
+	//void SolveProblem();	
+	void sendWorkAtStart();	// distribuje praci
+	void listenAtStart();	// nasloucha na praci
+	void startComputing();	// zahajeni vypoctu
 	void printMaxClique();
 };
 

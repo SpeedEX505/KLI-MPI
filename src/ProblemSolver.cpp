@@ -1,6 +1,8 @@
 #include "ProblemSolver.h"
 #include "Graph.h"
 #include "Stack.h"
+
+#include "MPIHolder.h"
 using namespace std;
 
 void MaxClique::destroyArray(){
@@ -24,7 +26,7 @@ MaxClique::~MaxClique(){
 	destroyArray();
 }
 
-int MaxClique::sizeArray(){
+int MaxClique::getSize(){
 	return this->size;
 }
 
@@ -50,57 +52,24 @@ void MaxClique::printArrayNodes(){
 
 ProblemSolver::ProblemSolver(Graph* graph){
 	this->graph = graph;
-}
-
-/* Je třeba vytvořit funkci pracujici na stejnem principu, která projde pouze dany podstrom stavového prostoru.
- * Podstrom je daný zasobníkem a předava se jako parametr.
- * Funkce se nesmí vracet ve stromu zpátky více než po počáteční uzel(pozna se dle parametru), místo toho si žádá o další práci. Pouze master proces obsahuje prázdný uzel 
- * Na zacatku se musí neblokujicim způsobem podívat zda někdo nežádá práci. (funkce bool checkWorkAdepts())
- */
-void ProblemSolver::SolveProblem(){
-	Stack * stack = new Stack();
-	int lastNode = graph->size()-1;	
-	stack->push(0);
-	int lastDeleted=-1;
-
-	while(true){
-		if(stack->isEmpty()&&lastDeleted==lastNode)break;
-		if(stack->getTop() < lastNode){
-			int toPush=lastDeleted;			
-			if(toPush==-1){
-				toPush=stack->getTop()+1;
-			}else{
-				if(++toPush>lastNode){
-					lastDeleted=stack->pull();
-					continue;
-				}
-			}
-			stack->push(toPush);
-			lastDeleted=-1;
-			if(isClique(stack) == false){
-				lastDeleted=stack->pull();
-			}
-			continue;
-		}
-		if(stack->getTop() == lastNode){
-			lastDeleted=stack->pull();
-			continue;
-		}
-	}
-
-	delete stack;
-	this->printMaxClique();
-	cout << endl;
+	state = STATE_IDLE;
+	tokenColor=TOKEN_WHITE;
+	lastAsked=MPIHolder::getInstance().myRank;
+	token=0;
+	terminate=false;
+	endSize=0;
 }
 
 
 //TODO dodělat
-void ProblemSolver::solveSubtree(Stack * stackEnd){
-	lastDeleted=-1;
-	do{
-		if(checkWorkAdpets()){
-			lastDeleted=stack->pull();
-			continue;
+void ProblemSolver::solveSubtree(){
+	int lastDeleted=-1;
+	int lastNode = graph->size()-1;	
+	int citac=0;
+	
+	do{	
+		if(citac%100==0&&lastDeleted==-1){
+			return;
 		}
 		if(stack->getTop() < lastNode){
 			int toPush=lastDeleted;			
@@ -114,6 +83,7 @@ void ProblemSolver::solveSubtree(Stack * stackEnd){
 			}
 			stack->push(toPush);
 			lastDeleted=-1;
+			citac++;
 			if(isClique(stack) == false){
 				lastDeleted=stack->pull();
 			}
@@ -123,12 +93,12 @@ void ProblemSolver::solveSubtree(Stack * stackEnd){
 			lastDeleted=stack->pull();
 			continue;
 		}
-
-
-
-
-	}while(!stack->equals(stackEnd))
-
+	}while(stack->getSize()<=endSize);
+	state=STATE_IDLE;
+	if(token!=0){
+		//send token
+		token=0;
+	}
 }
 
 
@@ -149,7 +119,7 @@ void ProblemSolver::sendWorkAtStart(){
 		}
 		if(destinationCPU<cpuCnt){
 			int * array=stack->serialize();
-			MPI_Send (array, MPIHolder::getInstance().stackMaxSize, MPI_INT, destinationCPU, FLAG_SEND_JOB, MPI_COMM_WORLD);
+			MPI_Send (array, MPIHolder::getInstance().stackMaxSize, MPI_INT, destinationCPU, FLAG_JOB_SEND, MPI_COMM_WORLD);
 			lastDeleted=stack->pull();
 			destinationCPU++;
 		}else{
@@ -159,42 +129,96 @@ void ProblemSolver::sendWorkAtStart(){
 	int * pomArray = new int[MPIHolder::getInstance().stackMaxSize];
 	pomArray[0]=0;
 	while(destinationCPU<cpuCnt){
-		MPI_Send(pomArray,MPIHolder::getInstance().stackMaxSize,MPI_INT,destinationCPU,FLAG_SEND_JOB,MPI_COMM_WORLD);
+		MPI_Send(pomArray,MPIHolder::getInstance().stackMaxSize,MPI_INT,destinationCPU,FLAG_JOB_SEND,MPI_COMM_WORLD);
 		destinationCPU++;
 	}
 	delete [] pomArray;
+	endSize=0;
 }
+
+
 void ProblemSolver::listenAtStart(){
 	cout<<"CPU"<<MPIHolder::getInstance().myRank<<": Listening at start..."<<endl;
 	int array[MPIHolder::getInstance().stackMaxSize];
 	MPI_Status status;
-	MPI_Recv(&array, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, FLAG_SEND_JOB, MPI_COMM_WORLD, &status);
+	MPI_Recv(&array, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, FLAG_JOB_SEND, MPI_COMM_WORLD, &status);
 	stack = new Stack(array);
+	endSize=stack->getSize();
 }
 
 void ProblemSolver::startComputing(){
-	while(true){
-		SolveSubtree(stack);
+	while(!terminate){
+		switch(state){
+			case STATE_ACTIVE:
+				solveSubtree();
+				checkMessages();
+				break;
+			case STATE_IDLE:
+				getNewWork();
+				checkMessages();
+				break;
+		}	
 	}
 }
 
-void ProblemSolver::aduv(){
-	cout<<"aduv started"<<endl;
-	/*
-	TODO aduv algorithm
-	*/
+void ProblemSolver::Token(int * buffer){
+	if(state==STATE_ACTIVE){
+		token=buffer; // store token
+	}else{
+		//aktualizovat a odeslat token
+	}
+}
+void ProblemSolver::JobRequest(int * buffer,int source){
+	Stack * stackToSend = divideStack();	
+	if(stackToSend==0){
+		int * array=new int[1];
+		MPI_Send(array, 1, MPI_INT, source, FLAG_JOB_SEND, MPI_COMM_WORLD);
+	}else{
+		MPI_Send( stackToSend->serialize(),MPIHolder::getInstance().stackMaxSize,MPI_INT,source,FLAG_JOB_SEND,MPI_COMM_WORLD);
+		if(source<MPIHolder::getInstance().myRank){
+			tokenColor=TOKEN_BLACK;
+		}
+	}
 }
 
+void ProblemSolver::JobReceived(int * buffer){
+	state=STATE_ACTIVE;
+	stack = new Stack(buffer);
+	endSize = stack->getSize();
+	//TODO
+}
+
+Stack * ProblemSolver::divideStack(){
+	return 0;
+}
 
 Stack * ProblemSolver::getNewWork(){
 	// žádá procesy o novou práci. Jako návratová hodnota je zásobník, který je možné rovnou použít pro řešení
 }
 
+// TODO bere jen jednu zpravu
+void ProblemSolver::checkMessages(){
+	int flag;
+	MPI_Status status; 	
+	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+	if(flag==0) return;
 
-bool ProblemSolver::checkWorkAdepts(){
-	// funkce zkontroluje adepty na praci. Pokud obsahuje zadost o praci. Prideli mu tu co by mel ted delat a vrati true. Jinak vraci false.
-	// Navratova hodnota je dulezita pro pripadne vraceni ve stromu a pokracovani v praci.
-	return false;
+	int buffer[MPIHolder::getInstance().stackMaxSize];
+	MPI_Recv(&buffer, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+	switch(flag){
+		case FLAG_TOKEN:	//Přišel token
+			Token(buffer);
+			break;
+		case FLAG_JOB_REQUEST: 	//nekdo zada o praci
+			JobRequest(buffer,0); // TODO !!!!!! Jak dostat ze status source prichozí zpravy
+			break;
+		case FLAG_JOB_SEND: 	// prisla prace
+			JobReceived(buffer);
+			break;
+		case FLAG_JOB_NONE: 	// neni prace na muj request
+			//Je vubec nutna nějaka metoda? obslouží se už v getNewWork()
+			break;
+	}
 }
 
 bool ProblemSolver::isClique(Stack * stack){
@@ -219,7 +243,15 @@ bool ProblemSolver::isClique(Stack * stack){
 }
 
 void ProblemSolver::printMaxClique(){
-	cout << "Max clique size is/are: " << this->maxClique.sizeArray() << endl;
+	cout << "Max clique size is/are: " << this->maxClique.getSize() << endl;
 	this->maxClique.printArrayNodes();
+}
+
+int ProblemSolver::askerID(){
+	lastAsked = (lastAsked+1) % (MPIHolder::getInstance().cpuCounter);
+	if(lastAsked==MPIHolder::getInstance().myRank){
+		lastAsked = (lastAsked+1) % (MPIHolder::getInstance().cpuCounter);
+	}
+	return lastAsked;	
 }
 

@@ -1,10 +1,11 @@
 #ifndef MPIHolder_H
 #define MPIHolder_H
 
-#define FLAG_GET_JOB 100
-#define FLAG_SEND_JOB 101
-#define FLAG_JOB_ACCEPTED 102
-#define FLAG_NO_JOB 103
+#define FLAG_JOB_REQUEST 100
+#define FLAG_JOB_SEND 101
+#define FLAG_JOB_NONE 102
+#define FLAG_TOKEN 103
+#define FLAG_FINISH 104
 
 class MPIHolder{
 	public:
@@ -15,7 +16,12 @@ class MPIHolder{
 	int myRank;
 	int cpuCounter;
 	int stackMaxSize;
-
+	int * getTokenArray(int tokenColor, int maxClique, int cpuWithMaxClique){
+		int * array = new int [stackMaxSize];
+		array[0]=tokenColor;
+		array[1]=maxClique;
+		array[2]=cpuWithMaxClique;
+	}
 	private:
 	MPIHolder(){};
  	MPIHolder(MPIHolder const&);	 // Don't Implement
