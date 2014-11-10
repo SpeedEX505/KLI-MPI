@@ -22,7 +22,7 @@ int main(int argc, char ** argv) {
 	// vsichni procesy maji praci nyni se muzou zacit chovat rovnocene a pocitat do zblazneni	
 	ps.startComputing();
 
-	//ps.printResults();
+	//ps.printResults(); // sebrat vysledky a vytisknout
 	delete g;
 	MPI_Finalize();
 	return 0;

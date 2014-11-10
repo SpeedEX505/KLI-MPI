@@ -42,28 +42,30 @@ class ProblemSolver{
 	Stack* stack;
 	MaxClique maxClique;
 
-	int state; 		// stav procesoru
-	int tokenColor;		// barva
-	bool terminate;		// skoncil aduv?
-	int * token;
-	int lastAsked;		// naposledy dotazovaný procesor (getJob)
-	int endSize;		// ukoncovaci podminka solveSubtree
+	int state; 				// stav procesoru
+	int tokenColor;			// barva
+	bool terminate;			// skoncil aduv?
+	bool workRequestSent; 	// proti deadlocku 
+	int * token;			// token array nebo NULL pokud nema u sebe token
+	int lastAsked;			// naposledy dotazovaný procesor (getJob)
+	int endSize;			// ukoncovaci podminka solveSubtree
 
-	Stack* divideStack();
-	Stack* getNewWork();
+	Stack* divideStack(); 	// rozdělí stack a vratí ho. Pokud se nevyplatí vrati null
+	void WorkDone(); 		//Prace dodelana, nastavi promenne popr. pošle token dal
+	Stack* getNewWork(); 	// zada o novou praci
 	void checkMessages();	// Přijme zprávy a obslouží je
 
 	void Token(int * buffer);
 	void JobRequest(int * buffer, int source);
 	void JobReceived(int * buffer);
+	void NoJobReceived();
 		
 
 	bool isClique(Stack * stack);
-	void solveSubtree();
-	int askerID();		//získa id procesu, ktereho se ma zeptat na praci;
+	void solveSubtree(); 	// řeší dany podstrom na zaklade promenne stack
+	int askerID();			//získa id procesu, ktereho se ma zeptat na praci;
 public:
-	ProblemSolver(Graph * graph);
-	//void SolveProblem();	
+	ProblemSolver(Graph * graph);	
 	void sendWorkAtStart();	// distribuje praci
 	void listenAtStart();	// nasloucha na praci
 	void startComputing();	// zahajeni vypoctu

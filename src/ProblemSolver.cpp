@@ -58,10 +58,27 @@ ProblemSolver::ProblemSolver(Graph* graph){
 	token=0;
 	terminate=false;
 	endSize=0;
+	workRequestSent=false;
 }
 
+void ProblemSolver::WorkDone(){
+	state=STATE_IDLE;
+	if(token!=0){
+		int dest=(MPIHolder::getInstance().myRank+1)%(MPIHolder::getInstance().cpuCounter);
+		if(token[0]==TOKEN_WHITE&&tokenColor==TOKEN_BLACK){
+			token[0]=TOKEN_BLACK;
+		}
+		if(token[1]<maxClique.getSize()){
+			token[1]=maxClique.getSize();
+			token[2]=MPIHolder::getInstance().myRank;
+		}
+		MPI_Send(token, MPIHolder::getInstance().stackMaxSize, MPI_INT,dest, FLAG_TOKEN, MPI_COMM_WORLD);		
+		tokenColor=TOKEN_WHITE;
+		token=0;
+	}
+}
 
-//TODO dodělat
+//TODO dodělat --> nekde se to tu cykli
 void ProblemSolver::solveSubtree(){
 	int lastDeleted=-1;
 	int lastNode = graph->size()-1;	
@@ -94,11 +111,7 @@ void ProblemSolver::solveSubtree(){
 			continue;
 		}
 	}while(stack->getSize()<=endSize);
-	state=STATE_IDLE;
-	if(token!=0){
-		//send token
-		token=0;
-	}
+	WorkDone();
 }
 
 
@@ -134,6 +147,7 @@ void ProblemSolver::sendWorkAtStart(){
 	}
 	delete [] pomArray;
 	endSize=0;
+	state=STATE_ACTIVE;
 }
 
 
@@ -144,6 +158,7 @@ void ProblemSolver::listenAtStart(){
 	MPI_Recv(&array, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, FLAG_JOB_SEND, MPI_COMM_WORLD, &status);
 	stack = new Stack(array);
 	endSize=stack->getSize();
+	if(endSize>0)state=STATE_ACTIVE;
 }
 
 void ProblemSolver::startComputing(){
@@ -154,7 +169,7 @@ void ProblemSolver::startComputing(){
 				checkMessages();
 				break;
 			case STATE_IDLE:
-				getNewWork();
+				if(!workRequestSent) getNewWork();
 				checkMessages();
 				break;
 		}	
@@ -174,7 +189,7 @@ void ProblemSolver::JobRequest(int * buffer,int source){
 		int * array=new int[1];
 		MPI_Send(array, 1, MPI_INT, source, FLAG_JOB_SEND, MPI_COMM_WORLD);
 	}else{
-		MPI_Send( stackToSend->serialize(),MPIHolder::getInstance().stackMaxSize,MPI_INT,source,FLAG_JOB_SEND,MPI_COMM_WORLD);
+		MPI_Send( stackToSend->serialize(),MPIHolder::getInstance().stackMaxSize, MPI_INT,source,FLAG_JOB_SEND,MPI_COMM_WORLD);
 		if(source<MPIHolder::getInstance().myRank){
 			tokenColor=TOKEN_BLACK;
 		}
@@ -183,41 +198,53 @@ void ProblemSolver::JobRequest(int * buffer,int source){
 
 void ProblemSolver::JobReceived(int * buffer){
 	state=STATE_ACTIVE;
+	tokenColor=TOKEN_WHITE;
 	stack = new Stack(buffer);
 	endSize = stack->getSize();
-	//TODO
+	workRequestSent=false;
+}
+void ProblemSolver::NoJobReceived(){
+	workRequestSent=false;
 }
 
+
+//TODO 
+// Zjisti zda se vyplati davat praci. Pokud ano rozdělí stack a vratí ho. Presune stack na dalsi uzel. [musi ho zkotrolovat protoze solve subtree predpoklada zkontrolovany stav]
+// pokud se to nevyplati vrati null (0)
 Stack * ProblemSolver::divideStack(){
 	return 0;
 }
 
 Stack * ProblemSolver::getNewWork(){
-	// žádá procesy o novou práci. Jako návratová hodnota je zásobník, který je možné rovnou použít pro řešení
+	int askerId = askerID();
+    int buffer[MPIHolder::getInstance().stackMaxSize];
+	MPI_Send(new int[MPIHolder::getInstance().stackMaxSize],MPIHolder::getInstance().stackMaxSize, MPI_INT,askerID(),FLAG_JOB_REQUEST,MPI_COMM_WORLD);
 }
 
 // TODO bere jen jednu zpravu
 void ProblemSolver::checkMessages(){
 	int flag;
-	MPI_Status status; 	
-	MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-	if(flag==0) return;
+	MPI_Status status;
+	while(true){
+		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+		if(flag==0) return;
 
-	int buffer[MPIHolder::getInstance().stackMaxSize];
-	MPI_Recv(&buffer, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-	switch(flag){
-		case FLAG_TOKEN:	//Přišel token
-			Token(buffer);
-			break;
-		case FLAG_JOB_REQUEST: 	//nekdo zada o praci
-			JobRequest(buffer,0); // TODO !!!!!! Jak dostat ze status source prichozí zpravy
-			break;
-		case FLAG_JOB_SEND: 	// prisla prace
-			JobReceived(buffer);
-			break;
-		case FLAG_JOB_NONE: 	// neni prace na muj request
-			//Je vubec nutna nějaka metoda? obslouží se už v getNewWork()
-			break;
+		int buffer[MPIHolder::getInstance().stackMaxSize];
+		MPI_Recv(&buffer, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+		switch(flag){
+			case FLAG_TOKEN:	//Přišel token
+				Token(buffer);
+				break;
+			case FLAG_JOB_REQUEST: 	//nekdo zada o praci
+				JobRequest(buffer,0); // TODO !!!!!! Jak dostat ze status source prichozí zpravy??? nahradit za 0 jako druhy parametr
+				break;
+			case FLAG_JOB_SEND: 	// prisla prace 
+				JobReceived(buffer);
+				break;
+			case FLAG_JOB_NONE: 	// neni prace
+				NoJobReceived();
+				break;
+		}
 	}
 }
 
