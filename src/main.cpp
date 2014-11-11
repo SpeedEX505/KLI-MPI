@@ -17,11 +17,10 @@ int main(int argc, char ** argv) {
 	}else{					// slave procesy
 		ps.listenAtStart();		// naslouchat na praci od mastera
 	}
-	// Zeptat se šocha na barieru
 	MPI_Barrier(MPI_COMM_WORLD); // prace je rozdistribuvovana
 	// vsichni procesy maji praci nyni se muzou zacit chovat rovnocene a pocitat do zblazneni	
 	ps.startComputing();
-
+	
 	ps.printResults(); // sebrat vysledky a vytisknout
 	delete g;
 	MPI_Finalize();

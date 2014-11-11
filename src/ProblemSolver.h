@@ -31,6 +31,7 @@ public:
 	bool isSmallerThan(int size);
 	void addArrayNodes(int * array, int size);
 	void printArrayNodes();
+	int * serialize();
 };
 
 /** Testovaci trida, ktera vygeneruje stavovy prostor + hleda kliky 
@@ -49,6 +50,7 @@ class ProblemSolver{
 	bool workRequestSent; 	// proti deadlocku 
 	int * token;			// token array nebo NULL pokud nema u sebe token
 	int lastAsked;			// naposledy dotazovaný procesor (getJob)
+	int maxCliqueID;
 	int endSize;			// ukoncovaci podminka solveSubtree
 
 	Stack* divideStack(); 	// rozdělí stack a vratí ho. Pokud se nevyplatí vrati null
@@ -61,7 +63,7 @@ class ProblemSolver{
 	void JobRequest(int * buffer, int source);
 	void JobReceived(int * buffer);
 	void NoJobReceived();
-		
+	void SendClique();		
 
 	bool isClique(Stack * stack);
 	void solveSubtree(); 	// řeší dany podstrom na zaklade promenne stack

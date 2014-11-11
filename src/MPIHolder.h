@@ -5,7 +5,8 @@
 #define FLAG_JOB_SEND 101
 #define FLAG_JOB_NONE 102
 #define FLAG_TOKEN 103
-#define FLAG_FINISH 104
+#define FLAG_GET_CLIQUE 104
+#define FLAG_TERMINATE 105
 
 class MPIHolder{
 	public:

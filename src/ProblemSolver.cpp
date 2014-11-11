@@ -47,6 +47,15 @@ void MaxClique::printArrayNodes(){
 	for (int i = 0; i < this->size; i++)
 		cout << this->arrayNodes[i] << " ";
 }
+
+int * MaxClique::serialize(){
+	int * array = new int[MPIHolder::getInstance().stackMaxSize];
+	array[0]=size;
+	for(int i=1;i<=size;i++){
+		array[i]=arrayNodes[i-1];
+	}
+	return array;
+}
 // ------------------------------------------------------------------------------------------------
 
 ProblemSolver::ProblemSolver(Graph* graph){
@@ -191,7 +200,12 @@ void ProblemSolver::Token(int * buffer){
 	cout<<"CPU"<<MPIHolder::getInstance().myRank<<"tokenArrived"<<endl;
 	int myRank=MPIHolder::getInstance().myRank;
 	if(myRank==0){
-		cout<<"token prisel zpatky k p0"<<endl;
+		if(buffer[0]==TOKEN_WHITE){ //skoncil aduv je treba sebrat vysledek
+			terminate=true;
+			maxCliqueID=buffer[2];
+		}else{
+			p0TokenSent=true;
+		}
 		return;
 	}
 	
@@ -205,7 +219,7 @@ void ProblemSolver::Token(int * buffer){
 			buffer[1]=maxClique.getSize();
 			buffer[2]=MPIHolder::getInstance().myRank;
 		}
-		MPI_Send(buffer,MPIHolder::getInstance().stackMaxSize,MPI_INT,myRank%MPIHolder::getInstance().cpuCounter,FLAG_TOKEN,MPI_COMM_WORLD);
+		MPI_Send(buffer,MPIHolder::getInstance().stackMaxSize,MPI_INT,(myRank+1)%MPIHolder::getInstance().cpuCounter,FLAG_TOKEN,MPI_COMM_WORLD);
 		tokenColor=TOKEN_WHITE;
 		token=0;
 	}
@@ -214,7 +228,7 @@ void ProblemSolver::JobRequest(int * buffer,int source){
 	Stack * stackToSend = divideStack();	
 	if(stackToSend==0){
 		int * array=new int[1];
-		MPI_Send(array, 1, MPI_INT, source, FLAG_JOB_SEND, MPI_COMM_WORLD);
+		MPI_Send(array, 1, MPI_INT, source, FLAG_JOB_NONE, MPI_COMM_WORLD);
 	}else{
 		MPI_Send( stackToSend->serialize(),MPIHolder::getInstance().stackMaxSize, MPI_INT,source,FLAG_JOB_SEND,MPI_COMM_WORLD);
 		if(source<MPIHolder::getInstance().myRank){
@@ -255,7 +269,6 @@ void ProblemSolver::checkMessages(){
 	while(true){
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 		if(flag==0) return;
-		cout<<"flag"<<flag	<<endl;
 		int buffer[MPIHolder::getInstance().stackMaxSize];
 		MPI_Recv(&buffer, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 		switch(status.MPI_TAG){
@@ -271,6 +284,11 @@ void ProblemSolver::checkMessages(){
 			case FLAG_JOB_NONE: 	// neni prace
 				NoJobReceived();
 				break;
+			case FLAG_GET_CLIQUE:
+				SendClique();
+				break;
+			case FLAG_TERMINATE:
+				terminate=true;
 		}
 	}
 }
@@ -310,7 +328,26 @@ int ProblemSolver::askerID(){
 }
 
 void ProblemSolver::printResults(){
+	if(MPIHolder::getInstance().myRank!=0)return;
 	cout<<"PrintResult"<<endl;
+	MPI_Status status;
+	for(int i=1;i<MPIHolder::getInstance().cpuCounter;i++){
+		int flag=FLAG_TERMINATE;
+		if(i==maxCliqueID){
+			flag=FLAG_GET_CLIQUE;
+		}
+		MPI_Send(0,0,MPI_INT,i,flag,MPI_COMM_WORLD);
+	}
+	int * array = new int[MPIHolder::getInstance().stackMaxSize];
+	MPI_Recv(array,MPIHolder::getInstance().stackMaxSize, MPI_INT, maxCliqueID, FLAG_GET_CLIQUE, MPI_COMM_WORLD, &status);
+	int size=array[0];
+	cout<<"MaxClique size:"<< size<<endl<<"Nodes: ";
+	for(int i=1;i<=size;i++){
+		cout<<array[i]<<" ";
+	}
+	cout<<endl<<"Process:"<<maxCliqueID<<endl;
+	MPI_Finalize();
+	exit(0);
 }
 
 void ProblemSolver::tokenStart(){
@@ -323,3 +360,8 @@ void ProblemSolver::tokenStart(){
 	}
 }
 
+void ProblemSolver::SendClique(){
+	int * array = maxClique.serialize();
+	MPI_Send(array,MPIHolder::getInstance().stackMaxSize,MPI_INT,0,FLAG_GET_CLIQUE,MPI_COMM_WORLD);
+	terminate=true;	
+}
