@@ -346,8 +346,6 @@ void ProblemSolver::printResults(){
 		cout<<array[i]<<" ";
 	}
 	cout<<endl<<"Process:"<<maxCliqueID<<endl;
-	MPI_Finalize();
-	exit(0);
 }
 
 void ProblemSolver::tokenStart(){

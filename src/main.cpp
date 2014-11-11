@@ -23,6 +23,7 @@ int main(int argc, char ** argv) {
 	
 	ps.printResults(); // sebrat vysledky a vytisknout
 	delete g;
+	std::cout<<"Ukoncuji se "<<MPIHolder::getInstance().myRank<<std::endl;
 	MPI_Finalize();
 	return 0;
 }
