@@ -21,7 +21,7 @@ int Graph::readNodesCnt(const char * fileName) {
 	}
 
 	fin.close();
-	cout << "Nodes to be loaded: " << line << endl;
+	//cout << "Nodes to be loaded: " << line << endl;
 	return nodesCnt;
 }
 

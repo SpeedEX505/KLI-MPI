@@ -70,10 +70,10 @@ ProblemSolver::ProblemSolver(Graph* graph){
 	p0TokenSent=false;
 }
 
+//dodelal svuj subtree
 void ProblemSolver::WorkDone(){
-	cout<<"WorkDone"<<endl;
-	state=STATE_IDLE;
-	if(token!=0){
+	state=STATE_IDLE;		// je ze me IDLE
+	if(token!=0){			// pokud drzim token obslouzi ho
 		int dest=(MPIHolder::getInstance().myRank+1)%(MPIHolder::getInstance().cpuCounter);
 		if(token[0]==TOKEN_WHITE&&tokenColor==TOKEN_BLACK){
 			token[0]=TOKEN_BLACK;
@@ -83,11 +83,13 @@ void ProblemSolver::WorkDone(){
 			token[2]=MPIHolder::getInstance().myRank;
 		}
 		MPI_Send(token, MPIHolder::getInstance().stackMaxSize, MPI_INT,dest, FLAG_TOKEN, MPI_COMM_WORLD);		
-		tokenColor=TOKEN_WHITE;
+		tokenColor=TOKEN_WHITE;		// odeslal jsem token obarvim se na bilo
 		token=0;
 	}
 }
 
+
+//expanduje stavy a resi je
 void ProblemSolver::solveSubtree(){
 	int lastDeleted=-1;
 	int lastNode = graph->size()-1;	
@@ -134,9 +136,8 @@ void ProblemSolver::solveSubtree(){
 
 
 
-//Kontrola na pocet uzlu a ochrana proti (vice uzlu nez prace)
+//Rozesle praci na zacatku
 void ProblemSolver::sendWorkAtStart(){
-	cout<<"CPU"<<MPIHolder::getInstance().myRank<<": Sending work at start..."<<endl;
 	int cpuCnt=MPIHolder::getInstance().cpuCounter;
 	int destinationCPU=1;	
 	stack = new Stack();
@@ -168,9 +169,8 @@ void ProblemSolver::sendWorkAtStart(){
 	state=STATE_ACTIVE;
 }
 
-
+//Nasloucha na zacatku
 void ProblemSolver::listenAtStart(){
-	cout<<"CPU"<<MPIHolder::getInstance().myRank<<": Listening at start..."<<endl;
 	int array[MPIHolder::getInstance().stackMaxSize];
 	MPI_Status status;
 	MPI_Recv(&array, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, FLAG_JOB_SEND, MPI_COMM_WORLD, &status);
@@ -179,8 +179,8 @@ void ProblemSolver::listenAtStart(){
 	if(endSize>0)state=STATE_ACTIVE;
 }
 
-void ProblemSolver::startComputing(){
-	cout<<"CPU"<<MPIHolder::getInstance().myRank<<"startComputing"<<endl;
+// Hlavní smycka
+void ProblemSolver::startComputing(){		
 	while(!terminate){
 		switch(state){
 			case STATE_ACTIVE:
@@ -196,47 +196,51 @@ void ProblemSolver::startComputing(){
 	}
 }
 
+//Prisel token
+//TODO (je mozne posilat v tokenu celou maximalni kliku)
 void ProblemSolver::Token(int * buffer){
-	cout<<"CPU"<<MPIHolder::getInstance().myRank<<"tokenArrived"<<endl;
 	int myRank=MPIHolder::getInstance().myRank;
-	if(myRank==0){
-		if(buffer[0]==TOKEN_WHITE){ //skoncil aduv je treba sebrat vysledek
+	if(myRank==0){						// jsem P0
+		if(buffer[0]==TOKEN_WHITE){ 	//skoncil aduv je treba sebrat vysledek
 			terminate=true;
 			maxCliqueID=buffer[2];
 		}else{
-			p0TokenSent=true;
+			p0TokenSent=false;			// je treba zacit nove kolo
 		}
 		return;
 	}
 	
-	if(state==STATE_ACTIVE){
-		token=buffer; // store token
-	}else{
+	if(state==STATE_ACTIVE){	// pokud pracuji jen ulozim token na pozdeji	
+		token=buffer; 			
+	}else{						// nepracuji, zpracuji token okamzite
 		if(tokenColor==TOKEN_BLACK){
-			buffer[0]=TOKEN_BLACK;	
+			buffer[0]=TOKEN_BLACK;			//obarvuji token
 		}
-		if(buffer[1]<maxClique.getSize()){
+		if(buffer[1]<maxClique.getSize()){	//kontroluju max Clique
 			buffer[1]=maxClique.getSize();
 			buffer[2]=MPIHolder::getInstance().myRank;
 		}
 		MPI_Send(buffer,MPIHolder::getInstance().stackMaxSize,MPI_INT,(myRank+1)%MPIHolder::getInstance().cpuCounter,FLAG_TOKEN,MPI_COMM_WORLD);
-		tokenColor=TOKEN_WHITE;
+		tokenColor=TOKEN_WHITE;				//odeslal jsem token. Obarvím se.
 		token=0;
 	}
 }
+
+//Prisla zadost o praci
 void ProblemSolver::JobRequest(int * buffer,int source){
 	Stack * stackToSend = divideStack();	
-	if(stackToSend==0){
+	if(stackToSend==0){						// vyplati se predavat praci?
 		int * array=new int[1];
-		MPI_Send(array, 1, MPI_INT, source, FLAG_JOB_NONE, MPI_COMM_WORLD);
+		MPI_Send(array, 1, MPI_INT, source, FLAG_JOB_NONE, MPI_COMM_WORLD); //neposilam praci
 	}else{
-		MPI_Send( stackToSend->serialize(),MPIHolder::getInstance().stackMaxSize, MPI_INT,source,FLAG_JOB_SEND,MPI_COMM_WORLD);
-		if(source<MPIHolder::getInstance().myRank){
+		MPI_Send( stackToSend->serialize(),MPIHolder::getInstance().stackMaxSize, MPI_INT,source,FLAG_JOB_SEND,MPI_COMM_WORLD); // posilam praci
+		if(source<MPIHolder::getInstance().myRank){ 		// posilam procesoru mensimu nez ja
 			tokenColor=TOKEN_BLACK;
 		}
 	}
 }
 
+//Byla nam pridelena nova prace
 void ProblemSolver::JobReceived(int * buffer){
 	state=STATE_ACTIVE;
 	tokenColor=TOKEN_WHITE;
@@ -244,6 +248,8 @@ void ProblemSolver::JobReceived(int * buffer){
 	endSize = stack->getSize();
 	workRequestSent=false;
 }
+
+//Zadany procesor pro nas nema praci
 void ProblemSolver::NoJobReceived(){
 	workRequestSent=false;
 }
@@ -256,23 +262,26 @@ Stack * ProblemSolver::divideStack(){
 	return 0;
 }
 
+
+// Zada o novou praci
 Stack * ProblemSolver::getNewWork(){
 	int askerId = askerID();
     int buffer[MPIHolder::getInstance().stackMaxSize];
 	MPI_Send(new int[MPIHolder::getInstance().stackMaxSize],MPIHolder::getInstance().stackMaxSize, MPI_INT,askerID(),FLAG_JOB_REQUEST,MPI_COMM_WORLD);
+	workRequestSent=true;
 }
 
-// TODO bere jen jednu zpravu
+// Kontroluje zpravy a reaguje na ne
 void ProblemSolver::checkMessages(){
 	int flag;
 	MPI_Status status;
 	while(true){
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-		if(flag==0) return;
+		if(flag==0) return; 						// neni zadna zprava
 		int buffer[MPIHolder::getInstance().stackMaxSize];
 		MPI_Recv(&buffer, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-		switch(status.MPI_TAG){
-			case FLAG_TOKEN:	//Přišel token
+		switch(status.MPI_TAG){						// na zaklade tagu se rozhoduje o co se jedna
+			case FLAG_TOKEN:		//Prisel token
 				Token(buffer);
 				break;
 			case FLAG_JOB_REQUEST: 	//nekdo zada o praci
@@ -284,15 +293,17 @@ void ProblemSolver::checkMessages(){
 			case FLAG_JOB_NONE: 	// neni prace
 				NoJobReceived();
 				break;
-			case FLAG_GET_CLIQUE:
+			case FLAG_GET_CLIQUE:	// mam nejvetsi kliku, prisla zadost o uzly
 				SendClique();
 				break;
-			case FLAG_TERMINATE:
+			case FLAG_TERMINATE:	// ukonci se
 				terminate=true;
 		}
 	}
 }
 
+
+//Je dany stav na zasobniku klika?
 bool ProblemSolver::isClique(Stack * stack){
 	int arrSize = stack->getSize();
 	int *values = stack->getArray();
@@ -314,11 +325,14 @@ bool ProblemSolver::isClique(Stack * stack){
 	return true;
 }
 
+// zastarale - pouzivalo se v seriove verzi
 void ProblemSolver::printMaxClique(){
 	cout << "Max clique size is/are: " << this->maxClique.getSize() << endl;
 	this->maxClique.printArrayNodes();
 }
 
+
+// Algoritmus hledani darce (lokalni citac)
 int ProblemSolver::askerID(){
 	lastAsked = (lastAsked+1) % (MPIHolder::getInstance().cpuCounter);
 	if(lastAsked==MPIHolder::getInstance().myRank){
@@ -327,9 +341,9 @@ int ProblemSolver::askerID(){
 	return lastAsked;	
 }
 
+//P0 sebere vysledky vypne ostatni procesy a vypise vysledek
 void ProblemSolver::printResults(){
-	if(MPIHolder::getInstance().myRank!=0)return;
-	cout<<"PrintResult"<<endl;
+	if(MPIHolder::getInstance().myRank!=0)return;;
 	MPI_Status status;
 	for(int i=1;i<MPIHolder::getInstance().cpuCounter;i++){
 		int flag=FLAG_TERMINATE;
@@ -348,6 +362,7 @@ void ProblemSolver::printResults(){
 	cout<<endl<<"Process:"<<maxCliqueID<<endl;
 }
 
+// P0 zacina ADUV
 void ProblemSolver::tokenStart(){
 	int myRank=MPIHolder::getInstance().myRank;
 	if(myRank!=0) return;
@@ -358,6 +373,7 @@ void ProblemSolver::tokenStart(){
 	}
 }
 
+// Zasle kliku procesoru 0
 void ProblemSolver::SendClique(){
 	int * array = maxClique.serialize();
 	MPI_Send(array,MPIHolder::getInstance().stackMaxSize,MPI_INT,0,FLAG_GET_CLIQUE,MPI_COMM_WORLD);
