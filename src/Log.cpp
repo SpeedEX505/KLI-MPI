@@ -2,12 +2,22 @@
 #include "MPIHolder.h"
 
 #include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+
+using namespace std;
 
 // ------------------------------------------------------------------------------------------------
-Log::Log(){
+static void Log::logToFile(string outToFile){
+	// nazev souboru
+	stringstream ss;
+	ss << MPIHolder::getInstance().myRank;
+	string oufFileName = string(ss) + ".log";
 
-}
-// ------------------------------------------------------------------------------------------------
-void Log::logToFile(){
-
+	fstream fout;
+	fout.open(outFileName, ios_base::out);
+	fout.seekp(0, ios::end);	// nastavi zapisovaci ukazatel na konec
+	fout << "MPIrank " << mpiRank << ": " << outToFile << endl;
+	fout.close();
 }
