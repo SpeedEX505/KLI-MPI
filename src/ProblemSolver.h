@@ -69,6 +69,7 @@ public:
 	void sendWorkAtStart();	// distribuje praci
 	void listenAtStart();	// nasloucha na praci
 	void startComputing();	// zahajeni vypoctu
+	void printResults(); 	// sebrani vysledku a interpretace
 	void printMaxClique();
 };
 

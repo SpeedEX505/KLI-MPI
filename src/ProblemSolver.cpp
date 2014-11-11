@@ -84,33 +84,40 @@ void ProblemSolver::solveSubtree(){
 	int lastNode = graph->size()-1;	
 	int citac=0;
 	
-	do{	
-		if(citac%100==0&&lastDeleted==-1){
+	while(true){
+		if(stack->getSize()<endSize){			//Konec subtree
+			break;
+		}
+		if(citac%100==0&&lastDeleted==-1){		//Udelano dost prace je treba zkontrolovat zpravy
 			return;
 		}
-		if(stack->getTop() < lastNode){
-			int toPush=lastDeleted;			
-			if(toPush==-1){
-				toPush=stack->getTop()+1;
-			}else{
-				if(++toPush>lastNode){
+		if(lastDeleted==-1){					// novy stav stav. prostoru?
+			citac++;							// pocet udelane prace ++
+			if(isClique(stack) == false){		// je aktualni stav klika?
 					lastDeleted=stack->pull();
 					continue;
-				}
 			}
-			stack->push(toPush);
-			lastDeleted=-1;
-			citac++;
-			if(isClique(stack) == false){
-				lastDeleted=stack->pull();
-			}
-			continue;
 		}
-		if(stack->getTop() == lastNode){
+		if(stack->getTop() == lastNode){		// jsme na vrcholu větve
 			lastDeleted=stack->pull();
 			continue;
 		}
-	}while(stack->getSize()<=endSize);
+		
+		if(stack->getTop() < lastNode){			// nejsme na vrcholu větve
+			int toPush=lastDeleted;			
+			if(toPush==-1){						// mame jit nahoru
+				toPush=stack->getTop()+1;		
+			}else{								// prisli jsme zezhora
+				if(++toPush>lastNode){			// jeste vice dolu
+					lastDeleted=stack->pull();
+				}else{							//do strany-nahoru
+					stack->push(toPush);
+					lastDeleted=-1;
+				}
+			}
+			continue;
+		}
+	}
 	WorkDone();
 }
 
@@ -280,5 +287,9 @@ int ProblemSolver::askerID(){
 		lastAsked = (lastAsked+1) % (MPIHolder::getInstance().cpuCounter);
 	}
 	return lastAsked;	
+}
+
+void ProblemSolver::printResults(){
+	cout<<"PrintResult"<<endl;
 }
 
