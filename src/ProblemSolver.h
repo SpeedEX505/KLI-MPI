@@ -44,7 +44,7 @@ class ProblemSolver{
 
 	int state; 				// stav procesoru
 	int tokenColor;			// barva
-	bool p1TokenSend;
+	bool p0TokenSent;		// p0 vypustil peska a jeste se nevratil
 	bool terminate;			// skoncil aduv?
 	bool workRequestSent; 	// proti deadlocku 
 	int * token;			// token array nebo NULL pokud nema u sebe token
@@ -55,7 +55,8 @@ class ProblemSolver{
 	void WorkDone(); 		//Prace dodelana, nastavi promenne popr. pošle token dal
 	Stack* getNewWork(); 	// zada o novou praci
 	void checkMessages();	// Přijme zprávy a obslouží je
-
+	void tokenStart();
+	
 	void Token(int * buffer);
 	void JobRequest(int * buffer, int source);
 	void JobReceived(int * buffer);

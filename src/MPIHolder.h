@@ -21,6 +21,7 @@ class MPIHolder{
 		array[0]=tokenColor;
 		array[1]=maxClique;
 		array[2]=cpuWithMaxClique;
+		return array;
 	}
 	private:
 	MPIHolder(){};

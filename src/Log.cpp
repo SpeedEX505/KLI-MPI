@@ -18,6 +18,6 @@ static void Log::logToFile(string outToFile){
 	fstream fout;
 	fout.open(outFileName, ios_base::out);
 	fout.seekp(0, ios::end);	// nastavi zapisovaci ukazatel na konec
-	fout << "MPIrank " << mpiRank << ": " << outToFile << endl;
+	fout << "MPIrank " << MPIHolder::getInstance().myRank << ": " << outToFile << endl;
 	fout.close();
 }

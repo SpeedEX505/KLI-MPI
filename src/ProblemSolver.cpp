@@ -16,7 +16,6 @@ void MaxClique::cpyArrayNodes(int * array, int size){
 	for (int i = 0; i < size; i++) 
 		this->arrayNodes[i] = array[i];
 }
-
 MaxClique::MaxClique(){
 	this->size = 0;
 	this->arrayNodes = NULL;
@@ -59,7 +58,7 @@ ProblemSolver::ProblemSolver(Graph* graph){
 	terminate=false;
 	endSize=0;
 	workRequestSent=false;
-	p1TokenSend=false;
+	p0TokenSent=false;
 }
 
 void ProblemSolver::WorkDone(){
@@ -80,7 +79,6 @@ void ProblemSolver::WorkDone(){
 	}
 }
 
-//TODO dodělat --> nekde se to tu cykli
 void ProblemSolver::solveSubtree(){
 	int lastDeleted=-1;
 	int lastNode = graph->size()-1;	
@@ -181,7 +179,7 @@ void ProblemSolver::startComputing(){
 				checkMessages();
 				break;
 			case STATE_IDLE:
-				cout<<"CPU"<<MPIHolder::getInstance().myRank<<"stateIdle"<<endl;
+				tokenStart();
 				if(!workRequestSent) getNewWork();
 				checkMessages();
 				break;
@@ -190,10 +188,26 @@ void ProblemSolver::startComputing(){
 }
 
 void ProblemSolver::Token(int * buffer){
+	cout<<"CPU"<<MPIHolder::getInstance().myRank<<"tokenArrived"<<endl;
+	int myRank=MPIHolder::getInstance().myRank;
+	if(myRank==0){
+		cout<<"token prisel zpatky k p0"<<endl;
+		return;
+	}
+	
 	if(state==STATE_ACTIVE){
 		token=buffer; // store token
 	}else{
-		//aktualizovat a odeslat token
+		if(tokenColor==TOKEN_BLACK){
+			buffer[0]=TOKEN_BLACK;	
+		}
+		if(buffer[1]<maxClique.getSize()){
+			buffer[1]=maxClique.getSize();
+			buffer[2]=MPIHolder::getInstance().myRank;
+		}
+		MPI_Send(buffer,MPIHolder::getInstance().stackMaxSize,MPI_INT,myRank%MPIHolder::getInstance().cpuCounter,FLAG_TOKEN,MPI_COMM_WORLD);
+		tokenColor=TOKEN_WHITE;
+		token=0;
 	}
 }
 void ProblemSolver::JobRequest(int * buffer,int source){
@@ -241,15 +255,15 @@ void ProblemSolver::checkMessages(){
 	while(true){
 		MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 		if(flag==0) return;
-
+		cout<<"flag"<<flag	<<endl;
 		int buffer[MPIHolder::getInstance().stackMaxSize];
 		MPI_Recv(&buffer, MPIHolder::getInstance().stackMaxSize, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-		switch(flag){
+		switch(status.MPI_TAG){
 			case FLAG_TOKEN:	//Přišel token
 				Token(buffer);
 				break;
 			case FLAG_JOB_REQUEST: 	//nekdo zada o praci
-				JobRequest(buffer,0); // TODO !!!!!! Jak dostat ze status source prichozí zpravy??? nahradit za 0 jako druhy parametr
+				JobRequest(buffer,status.MPI_SOURCE);
 				break;
 			case FLAG_JOB_SEND: 	// prisla prace 
 				JobReceived(buffer);
@@ -297,5 +311,15 @@ int ProblemSolver::askerID(){
 
 void ProblemSolver::printResults(){
 	cout<<"PrintResult"<<endl;
+}
+
+void ProblemSolver::tokenStart(){
+	int myRank=MPIHolder::getInstance().myRank;
+	if(myRank!=0) return;
+	if(!p0TokenSent){
+		int * token = MPIHolder::getInstance().getTokenArray(TOKEN_WHITE,maxClique.getSize(),0);
+		p0TokenSent=true;
+		MPI_Send(token,MPIHolder::getInstance().stackMaxSize,MPI_INT,1,FLAG_TOKEN,MPI_COMM_WORLD);
+	}
 }
 
