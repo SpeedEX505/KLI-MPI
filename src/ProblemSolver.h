@@ -44,6 +44,7 @@ class ProblemSolver{
 
 	int state; 				// stav procesoru
 	int tokenColor;			// barva
+	bool p1TokenSend;
 	bool terminate;			// skoncil aduv?
 	bool workRequestSent; 	// proti deadlocku 
 	int * token;			// token array nebo NULL pokud nema u sebe token

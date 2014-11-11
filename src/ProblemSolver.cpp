@@ -59,9 +59,11 @@ ProblemSolver::ProblemSolver(Graph* graph){
 	terminate=false;
 	endSize=0;
 	workRequestSent=false;
+	p1TokenSend=false;
 }
 
 void ProblemSolver::WorkDone(){
+	cout<<"WorkDone"<<endl;
 	state=STATE_IDLE;
 	if(token!=0){
 		int dest=(MPIHolder::getInstance().myRank+1)%(MPIHolder::getInstance().cpuCounter);
@@ -82,10 +84,10 @@ void ProblemSolver::WorkDone(){
 void ProblemSolver::solveSubtree(){
 	int lastDeleted=-1;
 	int lastNode = graph->size()-1;	
-	int citac=0;
+	int citac=1;
 	
 	while(true){
-		if(stack->getSize()<endSize){			//Konec subtree
+		if(stack->getSize()<endSize||stack->getSize()==0){			//Konec subtree
 			break;
 		}
 		if(citac%100==0&&lastDeleted==-1){		//Udelano dost prace je treba zkontrolovat zpravy
@@ -106,7 +108,9 @@ void ProblemSolver::solveSubtree(){
 		if(stack->getTop() < lastNode){			// nejsme na vrcholu větve
 			int toPush=lastDeleted;			
 			if(toPush==-1){						// mame jit nahoru
-				toPush=stack->getTop()+1;		
+				toPush=stack->getTop()+1;
+				stack->push(toPush);
+				lastDeleted=-1;	
 			}else{								// prisli jsme zezhora
 				if(++toPush>lastNode){			// jeste vice dolu
 					lastDeleted=stack->pull();
@@ -169,6 +173,7 @@ void ProblemSolver::listenAtStart(){
 }
 
 void ProblemSolver::startComputing(){
+	cout<<"CPU"<<MPIHolder::getInstance().myRank<<"startComputing"<<endl;
 	while(!terminate){
 		switch(state){
 			case STATE_ACTIVE:
@@ -176,6 +181,7 @@ void ProblemSolver::startComputing(){
 				checkMessages();
 				break;
 			case STATE_IDLE:
+				cout<<"CPU"<<MPIHolder::getInstance().myRank<<"stateIdle"<<endl;
 				if(!workRequestSent) getNewWork();
 				checkMessages();
 				break;
