@@ -96,7 +96,7 @@ void ProblemSolver::solveSubtree(){
 	int citac=1;
 	
 	while(true){
-		if(stack->getSize()<endSize||stack->getSize()==0){			//Konec subtree
+		if((stack->getSize()<endSize) || (stack->getSize()==0)&&lastDeleted==lastNode){			//Konec subtree
 			break;
 		}
 		if(citac%100==0&&lastDeleted==-1){		//Udelano dost prace je treba zkontrolovat zpravy
@@ -255,11 +255,24 @@ void ProblemSolver::NoJobReceived(){
 }
 
 
-//TODO 
-// Zjisti zda se vyplati davat praci. Pokud ano rozdělí stack a vratí ho. Presune stack na dalsi uzel. [musi ho zkotrolovat protoze solve subtree predpoklada zkontrolovany stav]
-// pokud se to nevyplati vrati null (0)
+//Rozdeli strom pokud je pocet uzlu ke zpracovani od toho uzlu 512 a vice a zaroven nejsem pocatecni uzel
+
+//TODO proverit stack is empty
 Stack * ProblemSolver::divideStack(){
-	return 0;
+	if(stack->getSize()==0) return 0;
+	int lastNode=graph->size()-1;
+	int pow = lastNode-stack->getTop();
+	int cnt=1;
+	Stack * toSend=0;
+	for(int i=0;i<pow;i++){// 2^i, i je prislusny radek pascalova trojuh.
+		cnt*=2;
+	}
+	if(cnt>500&&(stack->getSize()>endSize)){
+		toSend= new Stack(stack->serialize());
+		int lastDeleted=stack->pull();
+		stack->push(lastDeleted+1);
+	}	
+	return toSend;
 }
 
 
@@ -288,6 +301,7 @@ void ProblemSolver::checkMessages(){
 				JobRequest(buffer,status.MPI_SOURCE);
 				break;
 			case FLAG_JOB_SEND: 	// prisla prace 
+				//cout<<"CPU:"<<MPIHolder::getInstance().myRank<<" dostal praci od "<<status.MPI_SOURCE<<endl;
 				JobReceived(buffer);
 				break;
 			case FLAG_JOB_NONE: 	// neni prace
@@ -307,7 +321,6 @@ void ProblemSolver::checkMessages(){
 bool ProblemSolver::isClique(Stack * stack){
 	int arrSize = stack->getSize();
 	int *values = stack->getArray();
-	
 	for(int i = 0; i < arrSize; i++){
 		for(int j = 0; j < arrSize; j++){
 			if(i == j) continue;
@@ -325,10 +338,11 @@ bool ProblemSolver::isClique(Stack * stack){
 	return true;
 }
 
-// zastarale - pouzivalo se v seriove verzi
+// zastarale - pouzivalo se v seriove verzi --> pouzivam pro vypis z p0
 void ProblemSolver::printMaxClique(){
-	cout << "Max clique size is/are: " << this->maxClique.getSize() << endl;
+	cout << "MaxClique size: " << this->maxClique.getSize() << endl;
 	this->maxClique.printArrayNodes();
+	cout <<"Process: "<<MPIHolder::getInstance().myRank<<endl;
 }
 
 
@@ -345,21 +359,23 @@ int ProblemSolver::askerID(){
 void ProblemSolver::printResults(){
 	if(MPIHolder::getInstance().myRank!=0)return;;
 	MPI_Status status;
-	for(int i=1;i<MPIHolder::getInstance().cpuCounter;i++){
-		int flag=FLAG_TERMINATE;
-		if(i==maxCliqueID){
-			flag=FLAG_GET_CLIQUE;
+
+	if(maxCliqueID==0){
+		printMaxClique();
+	}else{
+		int * array = new int[MPIHolder::getInstance().stackMaxSize];
+		MPI_Send(0,0,MPI_INT,maxCliqueID,FLAG_GET_CLIQUE,MPI_COMM_WORLD);
+		MPI_Recv(array,MPIHolder::getInstance().stackMaxSize, MPI_INT, maxCliqueID, FLAG_GET_CLIQUE, MPI_COMM_WORLD, &status);
+		int size=array[0];
+		cout<<"MaxClique size:"<< size<<endl<<"Nodes: ";
+		for(int i=1;i<=size;i++){
+			cout<<array[i]<<" ";
 		}
-		MPI_Send(0,0,MPI_INT,i,flag,MPI_COMM_WORLD);
+		cout<<endl<<"Process: "<<maxCliqueID<<endl;
 	}
-	int * array = new int[MPIHolder::getInstance().stackMaxSize];
-	MPI_Recv(array,MPIHolder::getInstance().stackMaxSize, MPI_INT, maxCliqueID, FLAG_GET_CLIQUE, MPI_COMM_WORLD, &status);
-	int size=array[0];
-	cout<<"MaxClique size:"<< size<<endl<<"Nodes: ";
-	for(int i=1;i<=size;i++){
-		cout<<array[i]<<" ";
+	for(int i=1;i<MPIHolder::getInstance().cpuCounter;i++){
+		MPI_Send(0,0,MPI_INT,i,FLAG_TERMINATE,MPI_COMM_WORLD);
 	}
-	cout<<endl<<"Process:"<<maxCliqueID<<endl;
 }
 
 // P0 zacina ADUV
@@ -377,5 +393,4 @@ void ProblemSolver::tokenStart(){
 void ProblemSolver::SendClique(){
 	int * array = maxClique.serialize();
 	MPI_Send(array,MPIHolder::getInstance().stackMaxSize,MPI_INT,0,FLAG_GET_CLIQUE,MPI_COMM_WORLD);
-	terminate=true;	
 }

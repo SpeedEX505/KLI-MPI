@@ -31,7 +31,7 @@ void Stack::push(int value){
 
 int Stack::pull(){
 	if (array[0] == 0){
-		std::cerr << "Stack is empty\n";
+		std::cerr << "pull(): Stack is empty\n";
 		return -1;
 	}
 	int position = array[0];
@@ -43,7 +43,7 @@ int Stack::pull(){
 
 int Stack::getTop(){
 	if(array[0] == 0){
-		std::cerr << "Stack is empty\n";
+		std::cerr << "getTop(): Stack is empty\n";
 		return -1;	
 	}
 	return array[array[0]];
