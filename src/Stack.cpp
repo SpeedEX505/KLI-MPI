@@ -10,9 +10,12 @@ Stack::Stack(){
 	array[0]=0;
 }
 
-Stack::Stack(int * serializedStack){
+Stack::Stack(int * pomArray){
 	array=new int[MPIHolder::getInstance().stackMaxSize];
-	memcpy(array,serializedStack,MPIHolder::getInstance().stackMaxSize);
+	array[0]=pomArray[0];
+	for(int i=1;i<=pomArray[0];i++){
+		array[i]=pomArray[i];
+	}
 }
 
 Stack::~Stack(){

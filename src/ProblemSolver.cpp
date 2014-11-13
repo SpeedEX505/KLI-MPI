@@ -268,7 +268,7 @@ Stack * ProblemSolver::divideStack(){
 		cnt*=2;
 	}
 	if(cnt>500&&(stack->getSize()>endSize)){
-		toSend= new Stack(stack->serialize());
+		toSend = new Stack(stack->serialize());
 		int lastDeleted=stack->pull();
 		stack->push(lastDeleted+1);
 	}	
