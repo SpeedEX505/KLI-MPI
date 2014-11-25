@@ -1,0 +1,161 @@
+\documentclass[11pt]{article}
+\usepackage{array, xcolor, lipsum, bibentry}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[czech]{babel}	%cesky jazyk	
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[T5]{fontenc}	%kvuli memu jmenu 
+\usepackage{graphicx}
+
+
+
+ 
+\begin{document}
+
+\begin{center}
+	\bf Semestralní projekt MI-PAR 2014/2015:\\[5mm]
+	 Paralelní algoritmus pro řešení problému maximální klika grafu\\[5mm]
+       	Tomáš Šabata\\
+	 Ph{\'u} H{\h a}i B{\` u}i\\[2mm]
+	magisterské studijum, FIT ČVUT, Kolejní 550/2, 160 00 Praha 6\\[2mm]
+	\today
+\end{center}
+
+\section{Definice problému a popis sekvenčního algoritmu}
+
+Popište problém, který váš program řeší. Jako výchozí použijte text
+zadání, který rozšiřte o přesné vymezení všech odchylek, které jste
+vůči zadání během implementace provedli (např.  úpravy heuristické
+funkce, organizace zásobníku, apod.). Zmiňte i případně i takové
+prvky algoritmu, které v zadání nebyly specifikovány, ale které se
+ukázaly jako důležité.  Dále popište vstupy a výstupy algoritmu
+(formát vstupních a výstupních dat). Uveďte tabulku nameřených časů
+sekvenčního algoritmu pro různě velká data.
+\subsection{Vstupní data: }
+
+%TODO - Tomas
+\section{Popis paralelního algoritmu a jeho implementace v MPI}
+
+Popište paralelní algoritmus, opět vyjděte ze zadání a přesně
+vymezte odchylky, zvláště u algoritmu pro vyvažování zátěže, hledání
+dárce, ci ukončení výpočtu.  Popište a vysvětlete strukturu
+celkového paralelního algoritmu na úrovni procesů v MPI a strukturu
+kódu jednotlivých procesů. Např. jak je naimplementována smyčka pro
+činnost procesů v aktivním stavu i v stavu nečinnosti. Jaké jste
+zvolili konstanty a parametry pro škálování algoritmu. Struktura a
+sémantika příkazové řádky pro spouštění programu.
+
+
+
+\section{Naměřené výsledky a vyhodnocení}
+
+\begin{enumerate}
+\item Zvolte tři instance problému s takovou velikostí vstupních dat, pro které má
+sekvenční algoritmus časovou složitost kolem 5, 10 a 15 minut. Pro
+meření čas potřebný na čtení dat z disku a uložení na disk
+neuvažujte a zakomentujte ladící tisky, logy, zprávy a výstupy.
+\begin{table}[h]
+	\caption{Naměřené hodnoty}
+	\label{tab:namereneHodnoty}
+	\centering
+	\begin{tabular}{| c || c | c | c |}
+		\hline
+		\textbf{Počer jader $\backslash$ Graf} & \textbf{55 uzlový} & \textbf{65 uzlový} & \textbf{70 uzlový} \\
+		\hline \hline
+		1 & 281 s & 615 s & 901 s  \\
+		\hline
+		2 & 214 s & 797 s & 925 s \\
+		\hline
+		4 & 216 s & 727 s & 704 s  \\
+		\hline
+		8 & 177 s & 328 s & 326 s \\
+		\hline
+		16 & 171 s & 90 s & 132 s  \\
+		\hline
+		32 & 178 s & 95 s & 134 s  \\
+		\hline
+	\end{tabular}
+\end{table}
+\item Měřte paralelní čas při použití $i=2,\cdot,32$ procesorů na sítích Ethernet a InfiniBand.
+%\item Pri mereni kazde instance problemu na dany pocet procesoru spoctete pro vas algoritmus dynamicke delby prace celkovy pocet odeslanych zadosti o praci, prumer na 1 procesor a jejich uspesnost.
+%\item Mereni pro dany pocet procesoru a instanci problemu provedte 3x a pouzijte prumerne hodnoty.
+\item Z naměřených dat sestavte grafy zrychlení $S(n,p)$. Zjistěte, zda a za jakych podmínek
+došlo k superlineárnímu zrychlení a pokuste se je zdůvodnit.
+\item Vyhodnoďte komunikační složitost dynamického vyvažování zátěže a posuďte
+vhodnost vámi implementovaného algoritmu pro hledání dárce a dělení
+zásobníku pri řešení vašeho problému. Posuďte efektivnost a
+škálovatelnost algoritmu. Popište nedostatky vaší implementace a
+navrhněte zlepšení.
+\item Empiricky stanovte
+granularitu vaší implementace, tj., stupeň paralelismu pro danou
+velikost řešeného problému. Stanovte kritéria pro stanovení mezí, za
+kterými již není učinné rozkládat výpočet na menší procesy, protože
+by komunikační náklady prevážily urychlení paralelním výpočtem.
+
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\section{Závěr}
+
+Celkové zhodnocení semestrální práce a zkušenosti získaných během
+semestru.
+
+\section{Literatura}
+
+\appendix
+
+\section{Návod pro vkládání grafů a obrázků do Latexu}
+
+Nejjednodušší způsob vytvoření obrázku je použít vektorový grafický
+editor (např. xfig nebo jfig), ze kterého lze exportovat buď
+\begin{itemize}
+\item postscript formáty (ps nebo eps formát) nebo
+\item latex formáty (v pořadí prostý latex, latex s macry epic, eepic, eepicemu). Uvedené pořadí odpovídá růstu
+komplikovanosti obrázků který formát podporuje (prostá latex macra
+umožnují pouze jednoduché, epic makra něco mezi, je třeba
+vyzkoušet).
+
+\end{itemize}
+Následující příklady platí pro všechny případy.
+
+Obrázek v postscriptu, vycentrovaný a na celou šířku stránky, s
+popisem a číslem. Všimnete si, jak řídit velikost obrazku.
+%\begin{figure}[ht]
+%\epsfysize=3cm \centerline{\epsfbox{VasObrazek.ps}} \caption{Popis
+%vašeho obrazku} \label{labelvasehoobrazku}
+%\end{figure}
+
+Obrázek pouze vložený mezi řádky textu, bez popisu a číslování.\\
+%\epsfxsize=1cm
+%\rule{0pt}{0pt}\hfill\epsfbox{VasObrazek.ps}\hfill\rule{0pt}{0pt}
+
+%Latexovské obrázky maji přípony *.latex, *.epic, *.eepic, a
+%*.eepicemu, respective.
+%\begin{figure}[ht]
+%\begin{center}
+%\input VasObrazek.latex
+%\end{center}
+%\caption{Popis vašeho obrázku} \label{l1}
+%\end{figure}
+%Vypuštením závorek {\tt figure} dostanete opět pouze rámeček v textu
+%bez čísla a popisu.
+
+%Takhle jednoduše můžete poskládat obrázky vedle sebe.
+%\begin{center}
+%\setlength{\unitlength}{0.1mm}\input VasObrazek.epic
+%\hglue 5mm
+%\setlength{\unitlength}{0.15mm}\input VasObrazek.eepic
+%\hglue 5mm
+%\setlength{\unitlength}{0.2mm}\input VasObrazek.eepicemu
+%\end{center}
+%Řídit velikost latexovskych obrázků lze příkazem
+%\begin{verbatim}
+%\setlength{\unitlength}{0.1mm}
+%\end{verbatim}
+%které mění měřítko rastru obrázku, Tyto příkazy je ale současně
+%nutné vyhodit ze souboru, který xfig vygeneroval.
+
+%Pro vytváření grafu lze použít program gnuplot, který umí generovat
+%postscriptovy soubor, ktery vložíte do Latexu výše uvedeným
+%způsobem.
+\end{document}
