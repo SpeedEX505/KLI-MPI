@@ -1,0 +1,58 @@
+Paralelní algoritmus jde rozdělit do několika navzájem disjunktních fází. Některé fáze jsou rozděleny barierami napříč přes všechny procesy. Jednotlivé fáze jsou popsány v sekci \ref{fáze}.
+
+Struktura programu: 
+-načtení dat (načtení grafu z textového souboru)
+-bariera (všechny procesy načetly data)
+-rozeslání (příjímání) počáteční práce
+-bariera
+-vlastní výpočet
+-získaní nejlepšího výsledku
+
+\section{fáze}
+\subsection{načtení dat}
+V této fázi všechny procesory uloží graf ze souboru a načtou důležité konstanty do singletonu. Jedná se o konstantu velikosti zásobníku, který je napříč celým programem stejně velký. Konstatní velikost zásobníku usnadní zasílaní bufferu zásobníku pomocí knihovny MPI.
+
+\subsection{rozesílaní (příjímaní) počáteční práce}
+Procesor s id 0 začne rozesílat postupně procesorům práci. Každému procesoru se pošle jeden počáteční uzel stavového prostoru, který si ve svém výpočtu expanduje.
+Expanze stavového prostoru je totožná se sekvenčním algoritmem. Procesory s id různém od 0. Naslouchají na příchozí práci. V případě, že je více procesorů než práce, zasílá se procesorům prázdný zásobník.
+
+\subsection{Vlastní výpočet}
+Vlastní výpočet obsahuje hlavní smyčku která se řídí příznakem status, tedy zda je procesor active nebo idle. V případě, že procesor se nachází ve stavu active, provádí SolveSubtree(), která expanduje 100 stavů stavového prostoru, a provadí checkMessages(), kde odpovídá na zprávy od ostatních procesorů. V případě, že se procesor nachazí ve stavu idle, provádí tokenStart() (v případě procesoru s id 0), getNewJob() a checkmessages().
+
+Na počátku této fáze se většina procesorů nachází ve stavech active. Proto většina procesorů expanduje stavy a počítá kliku. Po každých 100 zpracovaných uzlech skočí zpátky do hlavní smyčky za účelem zpracovaní příchozích zpráv.
+
+Soubežně s výpočtem se zahajuje algoritmus distribuvovaného ukončení výpočtu (ADUV), který spouští proces s id 0 po zpracovaní celého stvého stavového podprostoru.
+
+\subsection{získaní nejlepšího výsledku}
+Protože v algoritmu ADUV, zasíláme kromě tokenu i idProcesoru s nejlepším možným výsledkem pak procesor s id 0 tomuto procesoru může okamžitě zaslat zprávu se žádostí o uzly kliky. Toto by se dalo úplně odstranit pokud by se při algoritmu aduv zasílala i klika.
+
+\section{Vyvažování zátěže}
+\subsection{dělení zásobníku}
+Dělení zásobníku se provádí jinak, než je uvedeno v návodech na stránce EDUXu. Stavy se expandují a zpracovávají preorder, tedy po vyexpandování jednoho stavu se rovnou zpracovává. Dělení zásobníku tedy probíhá tak, že pokud je počet stavů nutných k expandovaní z akutalního stavu větší než konstanta k, pak se tento stav předá procesu žádajícímu o práci. Proces, který byl o práci žádán pokračuje tak, jako kdyby podstrom, který předal, již zpracoval.
+
+\subsection{Algoritmus hledání dárce}
+Algoritmus hledání dárce cyklicky rotuje doprava modulo počet procesů.
+
+\section{výčet důležitých funkcí}
+
+
+	- divideStack() - rozdělí zásobník pokud je práce dostatek
+	- WorkDone() - převadí proces do stavu idle a volá metodu token()
+	- getNewWork() - žádá o novou práci
+	- checkMessages() - příjme všechny zprávy a obslouží je 
+	- tokenStart() - procesor s id = 0 startuje ADUV 
+	
+	 - Token() - zpracovává a odesílá token algoritmu ADUV 
+	- JobRequest() - žádá o novou práci
+	- JobReceived() - zpracovaní bufferu v případě, že došla nová práce
+	- NoJobReceived() - žádáný procesor nepřidělil novou práci
+	- SendClique() - rozesílá kliku ve fázi získání nejlepšího výsledku		
+
+	- isClique() - zjištuje zda daný stav stavového prostoru je klika. Složitost O(n^2)
+	- solveSubtree() - řeší dany podstrom, zastaví se po vyšetření všech uzlů v podstromu. Každých 100 zpracovaných uzlů se přerušuje pro zpracovaní zpráv
+	- askerID() - získa id procesu, ktereho se ma zeptat na praci. Rotuje s id procesů.
+	
+	- sendWorkAtStart() - distribuje praci ve fázi rozesílaní (příjímaní) počáteční práce
+	void listenAtStart() - nasloucha na praci ve fázi rozesílaní (příjímaní) počáteční práce
+	void startComputing() - zahajeni fáze vlastní výpočet
+	void printResults() - sebrani vysledku a interpretace. Jedná se o fázi získaní nejlepšího výsledku
